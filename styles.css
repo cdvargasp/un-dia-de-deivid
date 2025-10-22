@@ -1,15 +1,16 @@
 :root{
-  /* PALETA LUJO/ELEGANCIA */
-  --bg:#0B1F3A;        /* marino de fondo */
-  --card:#122845;      /* marino +1 para tarjetas */
-  --text:#F9F7F2;      /* casi blanco cálido */
-  --muted:#C9C4BC;     /* gris suave cálido */
-  --accent:#CFA24A;    /* ORO (botones/enlaces) */
+  /* AZULES PUROS (nada de morados) */
+  --bg:#091A2E;        /* Royal Blue (fondo) */
+  --bg2:#14202E;       /* Navy Blue (degradado) */
+  --card:#0F1B2C;      /* tarjeta ligeramente más clara */
+  --text:#F2F5FA;      /* texto */
+  --muted:#9FB0C3;     /* gris azulado */
+  --accent:#88A9C3;    /* Blue Gray (botones/enlaces) */
 
-  /* Estados (puedes mantenerlos) */
-  --ok:#3FD17A;        /* éxito */
-  --warn:#FFD166;      /* advertencia */
-  --bad:#FF5C7A;       /* error */
+  /* estados */
+  --ok:#25B06E;
+  --warn:#E1B04B;
+  --bad:#E0546B;
 }
 
 *{box-sizing:border-box}
@@ -17,7 +18,8 @@ html,body{margin:0;height:100%}
 body{
   font-family:"Montserrat",system-ui,-apple-system,Segoe UI,Roboto,Arial;
   color:var(--text);
-  background:linear-gradient(160deg,#08162A,#0B1F3A 60%,#08162A);
+  /* Degradado solo entre azules (sin tintes) */
+  background:linear-gradient(160deg, var(--bg) 0%, var(--bg2) 60%, var(--bg) 100%);
 }
 .topbar{
   position:sticky; top:0; z-index:10; backdrop-filter: blur(6px);
@@ -63,12 +65,10 @@ body{
   .sheet{align-items:center}
   .sheet-inner{border-radius:16px;max-height:90vh;overflow:auto}
 }
-/* Refinar contraste y botones */
-.card{ border:1px solid rgba(255,255,255,.06) }
-.btn{ background:var(--accent); color:#101010 }
-.btn.secondary{ background:rgba(255,255,255,.08) }
-.btn.ghost{ background:transparent; border:1px solid rgba(255,255,255,.12); color:var(--text) }
-.progress{ border:1px solid rgba(255,255,255,.12) }
-
-/* Ocultar sheets correctamente */
-.sheet[hidden]{ display:none !important; }
+.card{ background:var(--card); border:1px solid #1F2D45 }
+.topbar{ background:rgba(12,17,28,.7); border-bottom:1px solid #1F2D45 }
+.btn{ background:var(--accent); color:#0A0A0A }
+.btn.secondary{ background:#1F2D45; color:var(--text) }
+.btn.ghost{ background:transparent; border:1px solid #2B4257; color:var(--text) }
+.progress{ border:1px solid #1F2D45 }
+.sheet[hidden]{ display:none !important; }  /* asegura que los modales se oculten */
