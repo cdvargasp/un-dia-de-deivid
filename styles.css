@@ -1,23 +1,23 @@
 :root{
--bg:#091A2E;        /* Royal Blue (fondo) */
--bg2:#14202E;       /* Navy Blue (degradado) */
--card:#0F1B2C;      /* tarjeta ligeramente más clara */
--text:#F2F5FA;      /* texto */
--muted:#9FB0C3;     /* gris azulado */
--accent:#88A9C3;    /* Blue Gray (botones/enlaces) */
+--bg:#D9DBDF;            /* Gris de fondo */
+--card:#14202E;          /* Azul profundo para tarjetas */
+--ink:#14202E;           /* Azul para textos generales */
+--text-body:#14202E;     /* Texto sobre fondo gris */
+--text-on-card:#FFFFFF;  /* Texto dentro de tarjetas azules */
+--muted:#5E6875;         /* Gris para textos secundarios */
+--edge:#2B4257;          /* Azul grisáceo para bordes */
+--accent:#E3B23C;        /* Amarillo Oxford (barra/selecciones) */
 
-  /* estados */
--ok:#25B06E;
--warn:#E1B04B;
--bad:#E0546B;
+  /* Botones grises */
+--btn-gray:#C7CCD3;
+--btn-gray-border:#AAB1BA;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{
   font-family:"Montserrat",system-ui,-apple-system,Segoe UI,Roboto,Arial;
-  color:var(--text);
-  /* Degradado solo entre azules (sin tintes) */
-  background:linear-gradient(160deg, var(--bg) 0%, var(--bg2) 60%, var(--bg) 100%);
+  background: var(--bg);         /* gris plano, sin degradado morado */
+  color: var(--text-body);       /* texto azul */
 }
 .topbar{
   position:sticky; top:0; z-index:10; backdrop-filter: blur(6px);
@@ -63,10 +63,47 @@ body{
   .sheet{align-items:center}
   .sheet-inner{border-radius:16px;max-height:90vh;overflow:auto}
 }
-.card{ background:var(--card); border:1px solid #1F2D45 }
-.topbar{ background:rgba(12,17,28,.7); border-bottom:1px solid #1F2D45 }
-.btn{ background:var(--accent); color:#0A0A0A }
-.btn.secondary{ background:#1F2D45; color:var(--text) }
-.btn.ghost{ background:transparent; border:1px solid #2B4257; color:var(--text) }
-.progress{ border:1px solid #1F2D45 }
-.sheet[hidden]{ display:none !important; }  /* asegura que los modales se oculten */
+/* Tarjetas azules con texto blanco */
+.card{
+  background: var(--card);
+  color: var(--text-on-card);
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+}
+
+/* Topbar gris-azulada */
+.topbar{
+  background: rgba(20,32,46,.90);
+  border-bottom: 1px solid var(--edge);
+}
+
+/* Botones grises */
+.btn{
+  background: var(--btn-gray);
+  color: var(--ink);
+  border: 1px solid var(--btn-gray-border);
+}
+.btn.secondary{ background:#BFC4CB; color:var(--ink); }
+.btn.ghost{ background:transparent; color:var(--ink); border:1px solid var(--btn-gray-border); }
+
+/* Texto fuera de tarjetas: azul y secundarios en gris */
+.big, h1,h2,h3,h4 { color: var(--ink); }
+.muted { color: var(--muted); }
+
+/* Barra de progreso: borde azul, relleno amarillo */
+.progress{
+  height: 10px;
+  background: #E4E7EC;
+  border-radius: 999px;
+  border: 1px solid var(--edge);
+  overflow: hidden;
+}
+.bar{
+  height: 100%;
+  width: 0;
+  background: var(--accent);   /* Amarillo Oxford */
+  transition: width .25s;
+}
+
+/* Modales correctamente ocultos */
+.sheet[hidden]{ display:none !important; }
