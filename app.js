@@ -105,8 +105,9 @@ function renderHeader(){
   $('#xpSemana').textContent = w;
   $('#metaText').textContent = `${w} / ${cfg.metaSemanal}`;
   const pct = Math.min(100, Math.round(w*100/cfg.metaSemanal));
-  const bar = $('#barSemana'); bar.style.width = pct+'%';
-  bar.style.background = pct>=80 ? 'var(--ok)' : (pct>=50?'var(--warn)':'var(--bad)');
+const bar = $('#barSemana');
+bar.style.width = pct + '%';
+bar.style.background = 'var(--accent)'; // amarillo Oxford fijo
   renderRewards(w);
 }
 function renderHabitos(){
