@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>UN DÍA DE DEIVID</title>
 
-  <!-- Montserrat (Google Fonts) -->
+  <!-- Montserrat -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#0F1226">
+  <meta name="theme-color" content="#D9DBDF">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
 
   <link rel="stylesheet" href="styles.css" />
@@ -22,6 +22,7 @@
   </header>
 
   <main class="wrap">
+    <!-- Estado -->
     <section class="card">
       <div class="row">
         <div>
@@ -35,9 +36,7 @@
           <div><div class="tiny muted">XP semana</div><div id="xpSemana" class="big">0</div></div>
         </div>
       </div>
-      <div class="progress">
-        <div id="barSemana" class="bar"></div>
-      </div>
+      <div class="progress"><div id="barSemana" class="bar"></div></div>
       <div id="metaText" class="tiny muted">0 / 500</div>
       <div id="recompensaHint" class="hint tiny">Suma XP para desbloquear recompensas.</div>
       <div class="row gap">
@@ -47,6 +46,7 @@
       </div>
     </section>
 
+    <!-- Hábitos -->
     <section class="card">
       <div class="row">
         <h2>Hábitos de hoy</h2>
@@ -55,6 +55,7 @@
       <div id="habitosList" class="list"></div>
     </section>
 
+    <!-- Recompensas -->
     <section class="card">
       <h2>Recompensas</h2>
       <ul id="rewardsList" class="bullets"></ul>
@@ -62,7 +63,7 @@
     </section>
   </main>
 
-  <!-- Paneles -->
+  <!-- Panel Config -->
   <section id="panelConfig" class="sheet" hidden>
     <div class="sheet-inner">
       <h3>Configuración</h3>
@@ -82,6 +83,7 @@
     </div>
   </section>
 
+  <!-- Panel Resumen -->
   <section id="panelResumen" class="sheet" hidden>
     <div class="sheet-inner">
       <h3>Resumen semanal</h3>
@@ -92,9 +94,8 @@
 
   <script src="app.js"></script>
   <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
-    }
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
   </script>
 </body>
 </html>
+
