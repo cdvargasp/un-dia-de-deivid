@@ -1,18 +1,16 @@
 :root{
-  /* AZULES PUROS (nada de morados) */
-  --bg:#091A2E;        /* Royal Blue (fondo) */
-  --bg2:#14202E;       /* Navy Blue (degradado) */
-  --card:#0F1B2C;      /* tarjeta ligeramente más clara */
-  --text:#F2F5FA;      /* texto */
-  --muted:#9FB0C3;     /* gris azulado */
-  --accent:#88A9C3;    /* Blue Gray (botones/enlaces) */
+-bg:#091A2E;        /* Royal Blue (fondo) */
+-bg2:#14202E;       /* Navy Blue (degradado) */
+-card:#0F1B2C;      /* tarjeta ligeramente más clara */
+-text:#F2F5FA;      /* texto */
+-muted:#9FB0C3;     /* gris azulado */
+-accent:#88A9C3;    /* Blue Gray (botones/enlaces) */
 
   /* estados */
-  --ok:#25B06E;
-  --warn:#E1B04B;
-  --bad:#E0546B;
+-ok:#25B06E;
+-warn:#E1B04B;
+-bad:#E0546B;
 }
-
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{
