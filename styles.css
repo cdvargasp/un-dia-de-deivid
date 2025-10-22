@@ -16,7 +16,8 @@
 html,body{margin:0;height:100%}
 body{
   font-family:"Montserrat",system-ui,-apple-system,Segoe UI,Roboto,Arial;
-  color:var(--text); background:linear-gradient(160deg,#0a0c20,#14183d 60%,#0a0c20);
+  color:var(--text);
+  background:linear-gradient(160deg,#08162A,#0B1F3A 60%,#08162A);
 }
 .topbar{
   position:sticky; top:0; z-index:10; backdrop-filter: blur(6px);
