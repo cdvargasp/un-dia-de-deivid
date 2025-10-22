@@ -43,6 +43,7 @@ body{
 .sheet{
   position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end
 }
+.sheet[hidden]{ display:none !important; }
 .sheet-inner{
   width:100%;max-width:980px;margin:0 auto;background:#0f1226;padding:16px 16px 24px;
   border-top-left-radius:16px;border-top-right-radius:16px;border:1px solid #2a2f66
