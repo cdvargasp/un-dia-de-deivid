@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>UN DÍA DE DEIVID</title>
+
+  <!-- Montserrat (Google Fonts) -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0F1226">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>UN DÍA DE DEIVID</h1>
+    <button id="btnInstall" class="btn ghost" hidden>Instalar</button>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <div class="row">
+        <div>
+          <div class="muted tiny">Hoy</div>
+          <div id="todayLabel" class="big"></div>
+        </div>
+        <div class="kpi">
+          <div><div class="tiny muted">Nivel</div><div id="nivel" class="big">1</div></div>
+          <div><div class="tiny muted">Vidas</div><div id="vidas" class="big">3</div></div>
+          <div><div class="tiny muted">XP hoy</div><div id="xpHoy" class="big">0</div></div>
+          <div><div class="tiny muted">XP semana</div><div id="xpSemana" class="big">0</div></div>
+        </div>
+      </div>
+      <div class="progress">
+        <div id="barSemana" class="bar"></div>
+      </div>
+      <div id="metaText" class="tiny muted">0 / 500</div>
+      <div id="recompensaHint" class="hint tiny">Suma XP para desbloquear recompensas.</div>
+      <div class="row gap">
+        <button id="btnResumen" class="btn secondary">Resumen</button>
+        <button id="btnResetDia" class="btn ghost">Reiniciar día</button>
+        <button id="btnConfig" class="btn">Configurar</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="row">
+        <h2>Hábitos de hoy</h2>
+        <span class="tiny muted">Marca ✓ o FALLO. Se guarda solo.</span>
+      </div>
+      <div id="habitosList" class="list"></div>
+    </section>
+
+    <section class="card">
+      <h2>Recompensas</h2>
+      <ul id="rewardsList" class="bullets"></ul>
+      <p class="tiny muted">Domingo 23:59: si &lt;300 XP pierdes 1 vida; si ≥500 XP ganas 1 (máx 5).</p>
+    </section>
+  </main>
+
+  <!-- Paneles -->
+  <section id="panelConfig" class="sheet" hidden>
+    <div class="sheet-inner">
+      <h3>Configuración</h3>
+      <label>Meta semanal (XP) <input id="metaSemanal" type="number" min="100" step="10"></label>
+      <label>Desbloqueo comida (XP) <input id="umbralComida" type="number" min="100" step="10"></label>
+      <label>Desbloqueo cervezas (XP) <input id="umbralCerveza" type="number" min="100" step="10"></label>
+      <label>Vidas actuales (0–5) <input id="vidasInput" type="number" min="0" max="5"></label>
+      <h4>Hábitos</h4>
+      <table id="tblHabitos" class="table"></table>
+      <div class="row">
+        <input id="newHabName" type="text" placeholder="Nuevo hábito">
+        <input id="newHabXP" type="number" placeholder="XP">
+        <input id="newHabPenalty" type="number" placeholder="Penal">
+        <button id="addHab" class="btn">Agregar</button>
+      </div>
+      <div class="row end"><button id="closeConfig" class="btn ghost">Cerrar</button></div>
+    </div>
+  </section>
+
+  <section id="panelResumen" class="sheet" hidden>
+    <div class="sheet-inner">
+      <h3>Resumen semanal</h3>
+      <div id="resumenContent" class="tiny"></div>
+      <div class="row end"><button id="closeResumen" class="btn ghost">Cerrar</button></div>
+    </div>
+  </section>
+
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>
