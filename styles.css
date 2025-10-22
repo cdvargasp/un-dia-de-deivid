@@ -1,7 +1,17 @@
 :root{
-  --bg:#0F1226; --card:#171A35; --muted:#8f96c1; --text:#f3f4ff;
-  --ok:#3FD17A; --warn:#FFD166; --bad:#FF5C7A; --accent:#7B7FFF;
+  /* PALETA LUJO/ELEGANCIA */
+  --bg:#0B1F3A;        /* marino de fondo */
+  --card:#122845;      /* marino +1 para tarjetas */
+  --text:#F9F7F2;      /* casi blanco cálido */
+  --muted:#C9C4BC;     /* gris suave cálido */
+  --accent:#CFA24A;    /* ORO (botones/enlaces) */
+
+  /* Estados (puedes mantenerlos) */
+  --ok:#3FD17A;        /* éxito */
+  --warn:#FFD166;      /* advertencia */
+  --bad:#FF5C7A;       /* error */
 }
+
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{
