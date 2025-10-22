@@ -9,6 +9,7 @@ function isoWeekId(d){
   const week = Math.ceil((((_d - yearStart)/86400000)+1)/7);
   return `${_d.getUTCFullYear()}-W${String(week).padStart(2,'0')}`;
 }
+
 // ---- Claves
 const K = {
   cfg:'uddd_cfg_v1',
@@ -16,6 +17,7 @@ const K = {
   lastWeek:'uddd_last_week_v1',
   log:'uddd_log_' // + ymd
 };
+
 // ---- Config por defecto
 const defaultCfg = {
   metaSemanal:500,
@@ -32,6 +34,7 @@ const defaultCfg = {
     {id:'sueno',label:'Dormir ≥7h',xp:15,penalty:10},
   ]
 };
+
 // ---- Estado
 let cfg = JSON.parse(localStorage.getItem(K.cfg) || 'null') || defaultCfg;
 let vidas = parseInt(localStorage.getItem(K.lives) || '3',10);
@@ -104,10 +107,12 @@ function renderHeader(){
   const w = xpWeekNow();
   $('#xpSemana').textContent = w;
   $('#metaText').textContent = `${w} / ${cfg.metaSemanal}`;
+
   const pct = Math.min(100, Math.round(w*100/cfg.metaSemanal));
-const bar = $('#barSemana');
-bar.style.width = pct + '%';
-bar.style.background = 'var(--accent)'; // amarillo Oxford fijo
+  const bar = $('#barSemana');
+  bar.style.width = pct + '%';
+  bar.style.background = 'var(--accent)'; // AMARILLO fijo
+
   renderRewards(w);
 }
 function renderHabitos(){
@@ -121,7 +126,7 @@ function renderHabitos(){
       if(cb.checked) l[h.id]=true; else delete l[h.id];
       setLog(ymd(today),l); renderHeader(); renderHabitos();
     });
-    const label = document.createElement('div'); label.innerHTML = `<strong>${h.label}</strong><div class="tiny muted">+${h.xp} XP / <span style="color:var(--bad)">-${h.penalty}</span></div>`;
+    const label = document.createElement('div'); label.innerHTML = `<strong>${h.label}</strong><div class="tiny muted">+${h.xp} XP / <span style="color:#ff9aa6">-${h.penalty}</span></div>`;
     const fail = document.createElement('button'); fail.className='btn secondary'; fail.textContent='Fallar';
     fail.addEventListener('click', ()=>{
       const l=getLog(ymd(today)); l[h.id]=false; setLog(ymd(today),l); renderHeader(); renderHabitos();
@@ -211,7 +216,7 @@ document.getElementById('addHab').onclick = ()=>{
   renderCfgTable(); renderHabitos(); renderHeader();
 };
 
-// ---- Instalación PWA (Add to Home Screen)
+// ---- Instalación PWA
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e)=>{
   e.preventDefault(); deferredPrompt = e; const btn = document.getElementById('btnInstall'); btn.hidden=false;
@@ -225,9 +230,8 @@ window.addEventListener('beforeinstallprompt', (e)=>{
 
 // ---- Resumen semanal
 function weeklyReportHTML(){
-  // Lunes a domingo ISO de la semana actual
-  const base = new Date(today); // clonar
-  const currentDow = (today.getDay()+6)%7; // 0 lunes..6 domingo
+  const base = new Date(today);
+  const currentDow = (today.getDay()+6)%7;
   let days=[];
   for(let i=0;i<7;i++){
     const d=new Date(base); d.setDate(d.getDate()-currentDow+i);
@@ -250,3 +254,4 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
   renderHeader(); renderHabitos();
 });
+
