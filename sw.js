@@ -1,4 +1,4 @@
-const CACHE = 'uddd-themed-v1';
+const CACHE = 'uddd-themed-v3';
 const ASSETS = [
   './','./index.html','./styles.css','./app.js',
   './manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'
