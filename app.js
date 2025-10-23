@@ -60,43 +60,30 @@ const weekNow = isoWeekId(today);
 function getLog(d){ return JSON.parse(localStorage.getItem(K.log + d) || '{}'); }
 function setLog(d,obj){ localStorage.setItem(K.log + d, JSON.stringify(obj)); }
 
-// ---- Misión del día (persistente por fecha)
+// ---- "Misión" del día (solo informativa, SIN bonus)
 function getTodayQuest(){
   const key = K.quest + ymd(today);
   const existing = localStorage.getItem(key);
   if(existing) return JSON.parse(existing);
 
-  const tipos = ['double','deadline'];
-  const tipo = tipos[Math.floor(Math.random()*tipos.length)];
-  let quest;
-  if(tipo==='double'){
-    const target = cfg.habitos[Math.floor(Math.random()*cfg.habitos.length)];
-    quest = { type:'double', targetId:target.id, text:`Doble XP hoy en “${target.label}”.`, createdAt:Date.now() };
-  }else{
-    quest = { type:'deadline', deadline:'21:00', text:'Completa 4 hábitos antes de las 21:00 (+20 XP).', createdAt:Date.now() };
-  }
+  const target = cfg.habitos[Math.floor(Math.random()*cfg.habitos.length)];
+  const quest = {
+    type:'focus',
+    targetId: target.id,
+    text:`Enfoque del día: “${target.label}” (sin bonus).`,
+    createdAt: Date.now()
+  };
   localStorage.setItem(key, JSON.stringify(quest));
   return quest;
 }
 
-// ---- Cálculos de XP
+// ---- Cálculos de XP (sin influencia de la misión)
 function todayXP(){
   const log = getLog(ymd(today));
-  const quest = getTodayQuest();
-  let sum=0, done=0;
+  let sum=0;
   for(const h of cfg.habitos){
-    if(log[h.id]===true){
-      let base=h.xp;
-      if(quest.type==='double' && quest.targetId===h.id) base*=2;
-      sum += base; done++;
-    }else if(log[h.id]===false){
-      sum -= h.penalty;
-    }
-  }
-  if(quest.type==='deadline'){
-    const [hh,mm] = quest.deadline.split(':').map(Number);
-    const limite = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hh, mm, 0);
-    if(done>=4 && new Date()<=limite) sum += 20;
+    if(log[h.id]===true) sum += h.xp;
+    else if(log[h.id]===false) sum -= h.penalty;
   }
   return Math.max(0,sum);
 }
@@ -106,20 +93,11 @@ function xpSumWeek(weekId){
     const d=new Date(today); d.setDate(d.getDate()-i);
     if(isoWeekId(d)!==weekId) continue;
     const log=getLog(ymd(d));
-    const qraw = localStorage.getItem(K.quest+ymd(d));
-    const quest = qraw ? JSON.parse(qraw) : null;
-
-    let day=0, done=0;
+    let day=0;
     for(const h of cfg.habitos){
-      if(log[h.id]===true){
-        let base=h.xp;
-        if(quest && quest.type==='double' && quest.targetId===h.id) base*=2;
-        day += base; done++;
-      }else if(log[h.id]===false){
-        day -= h.penalty;
-      }
+      if(log[h.id]===true) day += h.xp;
+      else if(log[h.id]===false) day -= h.penalty;
     }
-    if(quest && quest.type==='deadline' && done>=4) day += 20;
     sum += Math.max(0,day);
   }
   return Math.max(0,sum);
@@ -130,20 +108,11 @@ function totalXPHistorico(){
   for(let i=0;i<120;i++){
     const d=new Date(today); d.setDate(d.getDate()-i);
     const log=getLog(ymd(d));
-    const qraw = localStorage.getItem(K.quest+ymd(d));
-    const quest = qraw ? JSON.parse(qraw) : null;
-
-    let day=0, done=0;
+    let day=0;
     for(const h of cfg.habitos){
-      if(log[h.id]===true){
-        let base=h.xp;
-        if(quest && quest.type==='double' && quest.targetId===h.id) base*=2;
-        day += base; done++;
-      }else if(log[h.id]===false){
-        day -= h.penalty;
-      }
+      if(log[h.id]===true) day += h.xp;
+      else if(log[h.id]===false) day -= h.penalty;
     }
-    if(quest && quest.type==='deadline' && done>=4) day += 20;
     sum += Math.max(0,day);
   }
   return Math.max(0,sum);
@@ -186,7 +155,7 @@ function renderHeader(){
   const bar = $('#barSemana'); if(bar){ bar.style.width = pct + '%'; bar.style.background = 'var(--btn)'; }
 
   renderRewards(w);
-  renderQuest();
+  renderQuest();     // solo muestra texto motivacional
   renderStats();
 }
 
@@ -194,7 +163,6 @@ function renderHabitos(){
   const cont = $('#habitosList'); if(!cont) return;
   cont.innerHTML='';
   const log = getLog(ymd(today));
-  const quest = getTodayQuest();
 
   cfg.habitos.forEach(h=>{
     const row = document.createElement('div'); row.className='habit'+(log[h.id]===true?' done':'');
@@ -204,8 +172,8 @@ function renderHabitos(){
       if(cb.checked) l[h.id]=true; else delete l[h.id];
       setLog(ymd(today),l); renderHeader(); renderHabitos();
     });
-    const bonus = (quest.type==='double' && quest.targetId===h.id) ? ' <span class="tiny" style="opacity:.85">(Doble XP)</span>' : '';
-    const label = document.createElement('div'); label.innerHTML = `<strong>${h.label}</strong>${bonus}<div class="tiny muted">+${h.xp} XP / <span style="color:#ffd3c2">-${h.penalty}</span></div>`;
+    const label = document.createElement('div'); 
+    label.innerHTML = `<strong>${h.label}</strong><div class="tiny muted">+${h.xp} XP / <span style="color:#ffd3c2">-${h.penalty}</span></div>`;
     const fail = document.createElement('button'); fail.className='btn'; fail.textContent='Fallar';
     fail.addEventListener('click', ()=>{
       const l=getLog(ymd(today)); l[h.id]=false; setLog(ymd(today),l); renderHeader(); renderHabitos();
@@ -233,19 +201,13 @@ function renderRewards(total){
   }
 }
 
-// --- Quest & Stats (no fallan si no existe el HTML) ---
+// ---- Quest (solo informativa) & Stats
 function renderQuest(){
   const q = getTodayQuest();
   const qt = $('#questText'); if(qt) qt.textContent = q.text;
-  const qs = $('#questStatus');
-  if(qs){
-    if(q.type==='deadline') qs.textContent = 'Reto: 4 hábitos antes de las 21:00 (+20 XP).';
-    else if(q.type==='double'){
-      const h = cfg.habitos.find(x=>x.id===q.targetId);
-      qs.textContent = h ? `Bonus en: ${h.label}` : '';
-    } else qs.textContent = '';
-  }
+  const qs = $('#questStatus'); if(qs) qs.textContent = '';
 }
+
 function statsToday(){
   const log = getLog(ymd(today));
   let energia=0, conocimiento=0, sabiduria=0, vitalidad=0;
