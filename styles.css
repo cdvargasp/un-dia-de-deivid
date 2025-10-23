@@ -8,9 +8,9 @@
   --edge:#2B4257;          /* borde azul grisáceo */
   --accent:#E3B23C;        /* AMARILLO OXFORD (barra) */
 
-  /* Botones grises */
-  --btn-gray:#C7CCD3;
-  --btn-gray-border:#AAB1BA;
+  /* Botones (todos como 'Resumen') */
+  --btn:#BFC4CB;           /* gris botón */
+  --btn-border:#AAB1BA;    /* borde botón */
 }
 
 *{box-sizing:border-box}
@@ -38,6 +38,7 @@ body{
   border-radius:14px; padding:14px;
   box-shadow:0 8px 24px rgba(0,0,0,.18);
 }
+
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .gap{gap:8px}
 .end{justify-content:flex-end}
@@ -47,15 +48,18 @@ body{
 .muted{color:#c9ced6}
 .bullets{margin:8px 0 0 18px}
 
+/* === TODOS LOS BOTONES IGUALES AL DE 'RESUMEN' === */
 .btn{
-  background: var(--btn-gray);
+  background: var(--btn);
   color: var(--ink);
-  border:1px solid var(--btn-gray-border);
-  padding:10px 14px;border-radius:10px;font-weight:600
+  border:1px solid var(--btn-border);
+  padding:10px 14px;border-radius:10px;font-weight:600;
+  cursor:pointer; user-select:none;
 }
-.btn.secondary{ background:#BFC4CB }
-.btn.ghost{ background:transparent }
+.btn:hover{ filter: brightness(0.97); }
+.btn:active{ filter: brightness(0.94); }
 
+/* Barra de progreso (relleno amarillo fijo) */
 .progress{
   height:10px;background:#E4E7EC;border-radius:999px;overflow:hidden;
   border:1px solid var(--edge);margin:8px 0
@@ -87,4 +91,3 @@ body{
   .sheet{align-items:center}
   .sheet-inner{border-radius:16px;max-height:90vh;overflow:auto}
 }
-
