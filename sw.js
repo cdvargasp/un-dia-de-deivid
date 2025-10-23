@@ -37,7 +37,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;
 
-  // 1) Navegación/HTML: network-first con fallback a cache y luego offline (index)
+  // 1) Navegación/HTML: network-first
   if (req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html')) {
     event.respondWith(
       fetch(req)
@@ -54,7 +54,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2) Estáticos: cache-first con revalidación en segundo plano
+  // 2) Estáticos: cache-first con revalidación
   event.respondWith(
     caches.match(req).then((cached) => {
       const fetchPromise = fetch(req)
@@ -63,7 +63,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE).then((c) => c.put(req, copy));
           return resp;
         })
-        .catch(() => cached); // si falla red, usa cache si existía
+        .catch(() => cached);
       return cached || fetchPromise;
     })
   );
