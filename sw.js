@@ -1,5 +1,5 @@
 // sw.js
-const CACHE = 'uddd-v2-2025-10-22';
+const CACHE = 'uddd-v3-2025-10-22';
 const ASSETS = [
   './',
   './index.html',
