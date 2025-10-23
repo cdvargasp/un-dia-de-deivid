@@ -15,7 +15,9 @@ const K = {
   cfg:'uddd_cfg_v1',
   lives:'uddd_lives_v1',
   lastWeek:'uddd_last_week_v1',
-  log:'uddd_log_' // + ymd
+  log:'uddd_log_', // + ymd
+  intro:'uddd_seen_intro_v1',
+  avatar:'uddd_avatar_dataurl_v1'
 };
 
 // ---- Config por defecto
@@ -99,6 +101,20 @@ function calcNivel(){
 
 // ---- UI helpers
 const $ = s => document.querySelector(s);
+
+function renderAvatar(){
+  const el = $('#avatarCircle');
+  const data = localStorage.getItem(K.avatar);
+  if(data){
+    el.style.backgroundImage = `url(${data})`;
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center';
+    el.innerHTML = '';
+  }else{
+    el.style.backgroundImage = '';
+    if(!el.innerHTML.trim()) el.innerHTML = '<span>DV</span>';
+  }
+}
 function renderHeader(){
   $('#todayLabel').textContent = new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
   $('#vidas').textContent = vidas;
@@ -186,7 +202,47 @@ function renderCfgTable(){
 }
 function saveCfg(){ localStorage.setItem(K.cfg, JSON.stringify(cfg)); }
 
-// ---- Botones
+// ---- Intro (primera vez) + Avatar
+function maybeOpenIntro(){
+  const seen = localStorage.getItem(K.intro)==='1';
+  if(!seen){ $('#panelIntro').hidden = false; }
+  // preview avatar si existe
+  const data = localStorage.getItem(K.avatar);
+  const prev = $('#introAvatarPreview');
+  if(data){
+    prev.style.backgroundImage = `url(${data})`;
+    prev.style.backgroundSize = 'cover';
+    prev.style.backgroundPosition = 'center';
+    prev.innerHTML = '';
+  }
+  // input
+  const inp = $('#introAvatarInput');
+  inp.onchange = async (e)=>{
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      localStorage.setItem(K.avatar, dataUrl);
+      // preview modal
+      const pv = $('#introAvatarPreview');
+      pv.style.backgroundImage = `url(${dataUrl})`;
+      pv.style.backgroundSize = 'cover';
+      pv.style.backgroundPosition = 'center';
+      pv.innerHTML = '';
+      // header
+      renderAvatar();
+    };
+    reader.readAsDataURL(file);
+  };
+  // botón empezar
+  $('#introStart').onclick = ()=>{
+    if($('#introNoShow').checked) localStorage.setItem(K.intro,'1');
+    $('#panelIntro').hidden = true;
+  };
+}
+
+// ---- Botones principales
 document.getElementById('btnConfig').onclick = ()=> openConfig(true);
 document.getElementById('closeConfig').onclick = ()=> openConfig(false);
 document.getElementById('btnResetDia').onclick = ()=>{
@@ -252,5 +308,9 @@ function weeklyReportHTML(){
 // ---- Init
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
-  renderHeader(); renderHabitos();
+  renderAvatar();
+  renderHeader();
+  renderHabitos();
+  maybeOpenIntro();
 });
+
