@@ -17,8 +17,7 @@ const K = {
   lastWeek:'uddd_last_week_v1',
   log:'uddd_log_', // + ymd
   introSeen:'uddd_intro_seen_v1',
-  avatar:'uddd_avatar_dataurl_v1',
-  quest:'uddd_quest_' // + ymd
+  avatar:'uddd_avatar_dataurl_v1'
 };
 
 // ---- Config por defecto
@@ -28,13 +27,13 @@ const defaultCfg = {
   umbralCerveza:500,
   maxVidas:5,
   habitos:[
-    {id:'comer',label:'Comer bien todo el día',xp:30,penalty:20, attr:'vitalidad'},
-    {id:'ingles',label:'Inglés 30 min',xp:20,penalty:15, attr:'conocimiento'},
-    {id:'trabajo',label:'Deep work 90 min',xp:25,penalty:20, attr:'conocimiento'},
-    {id:'estudio',label:'Estudio/maestría 45 min',xp:25,penalty:20, attr:'conocimiento'},
-    {id:'finanzas',label:'Control de finanzas (10 min)',xp:20,penalty:15, attr:'sabiduria'},
-    {id:'ejercicio',label:'Ejercicio 30 min o 7k pasos',xp:15,penalty:10, attr:'energia'},
-    {id:'sueno',label:'Dormir ≥7h',xp:15,penalty:10, attr:'energia'},
+    {id:'comer',label:'Comer bien todo el día',xp:30,penalty:20},
+    {id:'ingles',label:'Inglés 30 min',xp:20,penalty:15},
+    {id:'trabajo',label:'Deep work 90 min',xp:25,penalty:20},
+    {id:'estudio',label:'Estudio/maestría 45 min',xp:25,penalty:20},
+    {id:'finanzas',label:'Control de finanzas (10 min)',xp:20,penalty:15},
+    {id:'ejercicio',label:'Ejercicio 30 min o 7k pasos',xp:15,penalty:10},
+    {id:'sueno',label:'Dormir ≥7h',xp:15,penalty:10},
   ]
 };
 
@@ -60,30 +59,13 @@ const weekNow = isoWeekId(today);
 function getLog(d){ return JSON.parse(localStorage.getItem(K.log + d) || '{}'); }
 function setLog(d,obj){ localStorage.setItem(K.log + d, JSON.stringify(obj)); }
 
-// ---- "Misión" del día (solo informativa, SIN bonus)
-function getTodayQuest(){
-  const key = K.quest + ymd(today);
-  const existing = localStorage.getItem(key);
-  if(existing) return JSON.parse(existing);
-
-  const target = cfg.habitos[Math.floor(Math.random()*cfg.habitos.length)];
-  const quest = {
-    type:'focus',
-    targetId: target.id,
-    text:`Enfoque del día: “${target.label}” (sin bonus).`,
-    createdAt: Date.now()
-  };
-  localStorage.setItem(key, JSON.stringify(quest));
-  return quest;
-}
-
-// ---- Cálculos de XP (sin influencia de la misión)
+// ---- XP
 function todayXP(){
   const log = getLog(ymd(today));
   let sum=0;
   for(const h of cfg.habitos){
     if(log[h.id]===true) sum += h.xp;
-    else if(log[h.id]===false) sum -= h.penalty;
+    if(log[h.id]===false) sum -= h.penalty;
   }
   return Math.max(0,sum);
 }
@@ -93,12 +75,10 @@ function xpSumWeek(weekId){
     const d=new Date(today); d.setDate(d.getDate()-i);
     if(isoWeekId(d)!==weekId) continue;
     const log=getLog(ymd(d));
-    let day=0;
     for(const h of cfg.habitos){
-      if(log[h.id]===true) day += h.xp;
-      else if(log[h.id]===false) day -= h.penalty;
+      if(log[h.id]===true) sum += h.xp;
+      if(log[h.id]===false) sum -= h.penalty;
     }
-    sum += Math.max(0,day);
   }
   return Math.max(0,sum);
 }
@@ -108,12 +88,10 @@ function totalXPHistorico(){
   for(let i=0;i<120;i++){
     const d=new Date(today); d.setDate(d.getDate()-i);
     const log=getLog(ymd(d));
-    let day=0;
     for(const h of cfg.habitos){
-      if(log[h.id]===true) day += h.xp;
-      else if(log[h.id]===false) day -= h.penalty;
+      if(log[h.id]===true) sum += h.xp;
+      if(log[h.id]===false) sum -= h.penalty;
     }
-    sum += Math.max(0,day);
   }
   return Math.max(0,sum);
 }
@@ -140,8 +118,8 @@ function renderAvatar(){
 }
 
 function renderHeader(){
-  const todayEl = $('#todayLabel'); if(todayEl){
-    todayEl.textContent = new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
+  const tl = $('#todayLabel'); if(tl){
+    tl.textContent = new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
   }
   const vidasEl = $('#vidas'); if(vidasEl) vidasEl.textContent = vidas;
   const nivelEl = $('#nivel'); if(nivelEl) nivelEl.textContent = calcNivel();
@@ -155,15 +133,12 @@ function renderHeader(){
   const bar = $('#barSemana'); if(bar){ bar.style.width = pct + '%'; bar.style.background = 'var(--btn)'; }
 
   renderRewards(w);
-  renderQuest();     // solo muestra texto motivacional
-  renderStats();
 }
 
 function renderHabitos(){
   const cont = $('#habitosList'); if(!cont) return;
   cont.innerHTML='';
   const log = getLog(ymd(today));
-
   cfg.habitos.forEach(h=>{
     const row = document.createElement('div'); row.className='habit'+(log[h.id]===true?' done':'');
     const cb = document.createElement('input'); cb.type='checkbox'; cb.checked = log[h.id]===true;
@@ -172,8 +147,7 @@ function renderHabitos(){
       if(cb.checked) l[h.id]=true; else delete l[h.id];
       setLog(ymd(today),l); renderHeader(); renderHabitos();
     });
-    const label = document.createElement('div'); 
-    label.innerHTML = `<strong>${h.label}</strong><div class="tiny muted">+${h.xp} XP / <span style="color:#ffd3c2">-${h.penalty}</span></div>`;
+    const label = document.createElement('div'); label.innerHTML = `<strong>${h.label}</strong><div class="tiny muted">+${h.xp} XP / <span style="color:#ffd3c2">-${h.penalty}</span></div>`;
     const fail = document.createElement('button'); fail.className='btn'; fail.textContent='Fallar';
     fail.addEventListener('click', ()=>{
       const l=getLog(ymd(today)); l[h.id]=false; setLog(ymd(today),l); renderHeader(); renderHabitos();
@@ -196,48 +170,13 @@ function renderRewards(total){
     list.appendChild(li);
   });
   const faltan = Math.max(0, cfg.umbralComida - total);
-  const hint = $('#recompensaHint'); if(hint){
-    hint.textContent = faltan>0 ? `Te faltan ${faltan} XP para comida libre.` : `¡Recompensas desbloqueadas!`;
-  }
-}
 
-// ---- Quest (solo informativa) & Stats
-function renderQuest(){
-  const q = getTodayQuest();
-  const qt = $('#questText'); if(qt) qt.textContent = q.text;
-  const qs = $('#questStatus'); if(qs) qs.textContent = '';
-}
-
-function statsToday(){
-  const log = getLog(ymd(today));
-  let energia=0, conocimiento=0, sabiduria=0, vitalidad=0;
-  for(const h of cfg.habitos){
-    if(log[h.id]===true){
-      if(h.attr==='energia') energia+=h.xp;
-      if(h.attr==='conocimiento') conocimiento+=h.xp;
-      if(h.attr==='sabiduria') sabiduria+=h.xp;
-      if(h.attr==='vitalidad') vitalidad+=h.xp;
-    }else if(log[h.id]===false){
-      const p=Math.round(h.penalty/3);
-      if(h.attr==='energia') energia-=p;
-      if(h.attr==='conocimiento') conocimiento-=p;
-      if(h.attr==='sabiduria') sabiduria-=p;
-      if(h.attr==='vitalidad') vitalidad-=p;
-    }
-  }
-  const maxDia = cfg.habitos.reduce((a,b)=>a+b.xp,0) || 1;
-  const pct = v => Math.max(0,Math.min(100,Math.round(v*100/maxDia)));
-  return { energia:pct(energia), conocimiento:pct(conocimiento), sabiduria:pct(sabiduria), vitalidad:pct(vitalidad) };
-}
-function renderStats(){
-  const st = statsToday();
-  const set = (sel,val)=>{ const el=$(sel); if(el) el.style.width = Math.max(0,Math.min(100,val)) + '%'; };
-  set('#statEnergia', st.energia);
-  set('#statConocimiento', st.conocimiento);
-  set('#statSabiduria', st.sabiduria);
-  set('#statVitalidad', st.vitalidad);
-  const hint = $('#statsHint'); if(hint){
-    hint.textContent = `Hoy: 💪 ${st.energia}% · 🧠 ${st.conocimiento}% · 💰 ${st.sabiduria}% · 🍎 ${st.vitalidad}%`;
+  // Frase NUEVA genérica
+  const hint = $('#recompensaHint');
+  if(hint){
+    hint.textContent = faltan>0
+      ? `Te faltan al menos ${faltan} XP para alcanzar una recompensa.`
+      : `¡Recompensas desbloqueadas!`;
   }
 }
 
@@ -253,29 +192,21 @@ function fillConfig(){
 }
 function renderCfgTable(){
   const t = $('#tblHabitos'); if(!t) return;
-  t.innerHTML = `<tr><th>Hábito</th><th>XP</th><th>Penal</th><th>Atributo</th><th></th></tr>`;
+  t.innerHTML = `<tr><th>Hábito</th><th>XP</th><th>Penal</th><th></th></tr>`;
   cfg.habitos.forEach((h,i)=>{
     const tr=document.createElement('tr');
     tr.innerHTML = `
       <td><input data-i="${i}" data-k="label" value="${h.label}"></td>
       <td><input type="number" data-i="${i}" data-k="xp" value="${h.xp}"></td>
       <td><input type="number" data-i="${i}" data-k="penalty" value="${h.penalty}"></td>
-      <td>
-        <select data-i="${i}" data-k="attr">
-          <option value="energia" ${h.attr==='energia'?'selected':''}>Energía</option>
-          <option value="conocimiento" ${h.attr==='conocimiento'?'selected':''}>Conocimiento</option>
-          <option value="sabiduria" ${h.attr==='sabiduria'?'selected':''}>Sabiduría</option>
-          <option value="vitalidad" ${h.attr==='vitalidad'?'selected':''}>Vitalidad</option>
-        </select>
-      </td>
       <td><button class="btn" data-del="${i}">Eliminar</button></td>
     `;
     t.appendChild(tr);
   });
-  t.querySelectorAll('input,select').forEach(inp=>{
+  t.querySelectorAll('input').forEach(inp=>{
     inp.addEventListener('change', e=>{
       const i=+e.target.dataset.i; const k=e.target.dataset.k;
-      const v=(k==='label')? e.target.value : (k==='attr'? e.target.value : parseInt(e.target.value||'0',10));
+      const v=(k==='label')? e.target.value : parseInt(e.target.value||'0',10);
       cfg.habitos[i][k]=v; saveCfg(); renderHabitos(); renderHeader();
     });
   });
@@ -294,7 +225,8 @@ function wireIntro(){
   const remember = $('#rememberMe');
   const seen = localStorage.getItem(K.introSeen) === '1';
 
-  if(intro){ intro.hidden = !!seen; }
+  if(!seen && intro){ intro.hidden = false; }
+  else if(intro){ intro.hidden = true; }
 
   // avatar preview existente
   const data = localStorage.getItem(K.avatar);
@@ -362,22 +294,21 @@ document.getElementById('vidasInput')?.addEventListener('change', e=>{
   renderHeader();
 });
 document.getElementById('addHab')?.addEventListener('click', ()=>{
-  const nameEl=document.getElementById('newHabName');
-  const xpEl=document.getElementById('newHabXP');
-  const penEl=document.getElementById('newHabPenalty');
-  const name=(nameEl?.value||'').trim(); const xp=parseInt(xpEl?.value||'0',10);
-  const pen=parseInt(penEl?.value||'0',10);
+  const name=document.getElementById('newHabName')?.value.trim()||''; 
+  const xp=parseInt(document.getElementById('newHabXP')?.value||'0',10);
+  const pen=parseInt(document.getElementById('newHabPenalty')?.value||'0',10);
   if(!name || xp<=0) return;
-  cfg.habitos.push({id:'h'+Date.now(), label:name, xp:xp, penalty:pen, attr:'conocimiento'});
-  saveCfg(); if(nameEl) nameEl.value=''; if(xpEl) xpEl.value=''; if(penEl) penEl.value='';
+  cfg.habitos.push({id:'h'+Date.now(), label:name, xp:xp, penalty:pen});
+  saveCfg(); 
+  const n=document.getElementById('newHabName'); const x=document.getElementById('newHabXP'); const p=document.getElementById('newHabPenalty');
+  if(n) n.value=''; if(x) x.value=''; if(p) p.value='';
   renderCfgTable(); renderHabitos(); renderHeader();
 });
 
 // ---- Instalación PWA
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e)=>{
-  e.preventDefault(); deferredPrompt = e; const btn = document.getElementById('btnInstall');
-  if(!btn) return;
+  e.preventDefault(); deferredPrompt = e; const btn = document.getElementById('btnInstall'); if(!btn) return;
   btn.hidden=false;
   btn.onclick = async ()=>{
     btn.hidden = true;
