@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>UN DÍA DE DEIVID</title>
 
-  <!-- Tipografía -->
+  <!-- Luxury font -->
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- PWA -->
+  <!-- PWA / Theme -->
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#EEE9DF" />
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
 
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -32,7 +32,6 @@
           <div>
             <div class="muted tiny">Hoy</div>
             <div id="todayLabel" class="big"></div>
-            <div id="classTitle" class="tiny muted">Clase: —</div>
           </div>
         </div>
         <div class="kpi">
@@ -42,12 +41,11 @@
           <div><div class="tiny muted">XP semana</div><div id="xpSemana" class="big">0</div></div>
         </div>
       </div>
-
       <div class="progress"><div id="barSemana" class="bar"></div></div>
       <div id="metaText" class="tiny muted">0 / 500</div>
       <div id="recompensaHint" class="hint tiny">Suma XP para desbloquear recompensas.</div>
 
-      <!-- Misión del día -->
+      <!-- 🎯 Misión del día (no rompe si JS no lo usa) -->
       <div class="quest">
         <div class="quest-title">🎯 Misión del día</div>
         <div id="questText" class="quest-text tiny"></div>
@@ -57,12 +55,11 @@
       <div class="row gap">
         <button id="btnResumen" class="btn">Resumen</button>
         <button id="btnResetDia" class="btn">Reiniciar día</button>
-        <button id="btnCierre" class="btn">Cerrar día</button>
         <button id="btnConfig" class="btn">Configurar</button>
       </div>
     </section>
 
-    <!-- Stats -->
+    <!-- 📊 Stats del personaje -->
     <section class="card">
       <h2>Stats del personaje</h2>
       <div class="stats">
@@ -132,22 +129,15 @@
     </div>
   </section>
 
-  <!-- Panel Cierre de día -->
-  <section id="panelCierre" class="sheet" hidden>
-    <div class="sheet-inner">
-      <h3>Cierre del día</h3>
-      <div id="cierreNarrativa" class="tiny"></div>
-      <div class="row end"><button id="closeCierre" class="btn">Listo</button></div>
-    </div>
-  </section>
-
-  <!-- Intro -->
+  <!-- Intro / Bienvenida -->
   <section id="introSheet" class="sheet" hidden>
     <div class="sheet-inner">
       <h3>Bienvenido</h3>
       <p class="tiny">
         <b>UN DÍA DE DEIVID</b> es tu juego de hábitos. Marca tus logros diarios, suma XP y desbloquea recompensas semanales.
+        Tu objetivo: constancia, disciplina y mejora continua.
       </p>
+
       <div class="intro-grid">
         <div><div id="introAvatarPreview" class="avatar bigavatar"><span>DV</span></div></div>
         <div>
@@ -159,6 +149,7 @@
           </label>
         </div>
       </div>
+
       <div class="row end" style="margin-top:12px">
         <button id="btnStart" class="btn">Empezar</button>
       </div>
@@ -171,3 +162,4 @@
   </script>
 </body>
 </html>
+
