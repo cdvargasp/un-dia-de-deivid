@@ -60,7 +60,7 @@ const weekNow = isoWeekId(today);
 function getLog(d){ return JSON.parse(localStorage.getItem(K.log + d) || '{}'); }
 function setLog(d,obj){ localStorage.setItem(K.log + d, JSON.stringify(obj)); }
 
-// ---- Quest del día (persistente por fecha)
+// ---- Misión del día (persistente por fecha)
 function getTodayQuest(){
   const key = K.quest + ymd(today);
   const existing = localStorage.getItem(key);
@@ -71,19 +71,9 @@ function getTodayQuest(){
   let quest;
   if(tipo==='double'){
     const target = cfg.habitos[Math.floor(Math.random()*cfg.habitos.length)];
-    quest = {
-      type:'double',
-      targetId: target.id,
-      text:`Doble XP hoy en “${target.label}”. ¡Aprovecha el bonus!`,
-      createdAt: Date.now()
-    };
+    quest = { type:'double', targetId:target.id, text:`Doble XP hoy en “${target.label}”.`, createdAt:Date.now() };
   }else{
-    quest = {
-      type:'deadline',
-      deadline:'21:00',
-      text:'Completa al menos 4 hábitos antes de las 21:00 para +20 XP extra.',
-      createdAt: Date.now()
-    };
+    quest = { type:'deadline', deadline:'21:00', text:'Completa 4 hábitos antes de las 21:00 (+20 XP).', createdAt:Date.now() };
   }
   localStorage.setItem(key, JSON.stringify(quest));
   return quest;
@@ -93,20 +83,20 @@ function getTodayQuest(){
 function todayXP(){
   const log = getLog(ymd(today));
   const quest = getTodayQuest();
-  let sum=0, doneCount=0;
+  let sum=0, done=0;
   for(const h of cfg.habitos){
     if(log[h.id]===true){
-      let base = h.xp;
-      if(quest.type==='double' && quest.targetId===h.id) base *= 2;
-      sum += base; doneCount++;
+      let base=h.xp;
+      if(quest.type==='double' && quest.targetId===h.id) base*=2;
+      sum += base; done++;
+    }else if(log[h.id]===false){
+      sum -= h.penalty;
     }
-    if(log[h.id]===false) sum -= h.penalty;
   }
   if(quest.type==='deadline'){
-    const now = new Date();
-    const [hh,mm] = quest.deadline.split(':').map(x=>parseInt(x,10));
+    const [hh,mm] = quest.deadline.split(':').map(Number);
     const limite = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hh, mm, 0);
-    if(doneCount>=4 && now<=limite) sum += 20;
+    if(done>=4 && new Date()<=limite) sum += 20;
   }
   return Math.max(0,sum);
 }
@@ -116,21 +106,20 @@ function xpSumWeek(weekId){
     const d=new Date(today); d.setDate(d.getDate()-i);
     if(isoWeekId(d)!==weekId) continue;
     const log=getLog(ymd(d));
-    const quest = (localStorage.getItem(K.quest+ymd(d)) && JSON.parse(localStorage.getItem(K.quest+ymd(d)))) || null;
-    let day=0, doneCount=0;
+    const qraw = localStorage.getItem(K.quest+ymd(d));
+    const quest = qraw ? JSON.parse(qraw) : null;
+
+    let day=0, done=0;
     for(const h of cfg.habitos){
       if(log[h.id]===true){
-        let base = h.xp;
+        let base=h.xp;
         if(quest && quest.type==='double' && quest.targetId===h.id) base*=2;
-        day += base; doneCount++;
+        day += base; done++;
       }else if(log[h.id]===false){
         day -= h.penalty;
       }
     }
-    if(quest && quest.type==='deadline'){
-      const limite = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 21, 0, 0);
-      if(doneCount>=4) day += 20; // sin hora exacta histórica, asumimos logrado si hubo 4+
-    }
+    if(quest && quest.type==='deadline' && done>=4) day += 20;
     sum += Math.max(0,day);
   }
   return Math.max(0,sum);
@@ -141,18 +130,20 @@ function totalXPHistorico(){
   for(let i=0;i<120;i++){
     const d=new Date(today); d.setDate(d.getDate()-i);
     const log=getLog(ymd(d));
-    const quest = (localStorage.getItem(K.quest+ymd(d)) && JSON.parse(localStorage.getItem(K.quest+ymd(d)))) || null;
-    let day=0, doneCount=0;
+    const qraw = localStorage.getItem(K.quest+ymd(d));
+    const quest = qraw ? JSON.parse(qraw) : null;
+
+    let day=0, done=0;
     for(const h of cfg.habitos){
       if(log[h.id]===true){
         let base=h.xp;
         if(quest && quest.type==='double' && quest.targetId===h.id) base*=2;
-        day += base; doneCount++;
+        day += base; done++;
       }else if(log[h.id]===false){
         day -= h.penalty;
       }
     }
-    if(quest && quest.type==='deadline' && doneCount>=4) day += 20;
+    if(quest && quest.type==='deadline' && done>=4) day += 20;
     sum += Math.max(0,day);
   }
   return Math.max(0,sum);
@@ -162,73 +153,12 @@ function calcNivel(){
   if(t>=6000) return 5; if(t>=4000) return 4; if(t>=2000) return 3; if(t>=800) return 2; return 1;
 }
 
-// ---- Atributos del personaje (día actual)
-function statsToday(){
-  const log = getLog(ymd(today));
-  let energia=0, conocimiento=0, sabiduria=0, vitalidad=0;
-  for(const h of cfg.habitos){
-    if(log[h.id]===true){
-      if(h.attr==='energia') energia += h.xp;
-      if(h.attr==='conocimiento') conocimiento += h.xp;
-      if(h.attr==='sabiduria') sabiduria += h.xp;
-      if(h.attr==='vitalidad') vitalidad += h.xp;
-    }else if(log[h.id]===false){
-      const p = Math.round(h.penalty/3);
-      if(h.attr==='energia') energia -= p;
-      if(h.attr==='conocimiento') conocimiento -= p;
-      if(h.attr==='sabiduria') sabiduria -= p;
-      if(h.attr==='vitalidad') vitalidad -= p;
-    }
-  }
-  const maxDia = cfg.habitos.reduce((a,b)=>a+(b.xp),0);
-  const clampPct = v => Math.max(0, Math.min(100, Math.round(v*100/Math.max(1,maxDia))));
-  return {
-    energia: clampPct(energia),
-    conocimiento: clampPct(conocimiento),
-    sabiduria: clampPct(sabiduria),
-    vitalidad: clampPct(vitalidad)
-  };
-}
-
-// ---- Clase del personaje (últimos 14 días)
-function classFromLast14d(){
-  const sums = {energia:0, conocimiento:0, sabiduria:0, vitalidad:0};
-  for(let i=0;i<14;i++){
-    const d=new Date(today); d.setDate(d.getDate()-i);
-    const log=getLog(ymd(d));
-    for(const h of cfg.habitos){
-      if(log[h.id]===true){
-        if(h.attr==='energia') sums.energia += h.xp;
-        if(h.attr==='conocimiento') sums.conocimiento += h.xp;
-        if(h.attr==='sabiduria') sums.sabiduria += h.xp;
-        if(h.attr==='vitalidad') sums.vitalidad += h.xp;
-      }else if(log[h.id]===false){
-        const p = Math.round(h.penalty/3);
-        if(h.attr==='energia') sums.energia -= p;
-        if(h.attr==='conocimiento') sums.conocimiento -= p;
-        if(h.attr==='sabiduria') sums.sabiduria -= p;
-        if(h.attr==='vitalidad') sums.vitalidad -= p;
-      }
-    }
-  }
-  const entries = Object.entries(sums).sort((a,b)=>b[1]-a[1]);
-  const top = entries[0][0];
-  const map = {
-    energia:'Deportista',
-    conocimiento:'Estudioso',
-    sabiduria:'Financiero',
-    vitalidad:'Disciplinado'
-  };
-  return map[top] || 'Aprendiz';
-}
-
 // ---- UI helpers
 const $ = s => document.querySelector(s);
 
 function renderAvatar(){
-  const el = $('#avatarCircle');
+  const el = $('#avatarCircle'); if(!el) return;
   const data = localStorage.getItem(K.avatar);
-  if(!el) return;
   if(data){
     el.style.backgroundImage = `url(${data})`;
     el.style.backgroundSize = 'cover';
@@ -241,26 +171,19 @@ function renderAvatar(){
 }
 
 function renderHeader(){
-  const d = $('#todayLabel');
-  if(d){
-    d.textContent = new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
+  const todayEl = $('#todayLabel'); if(todayEl){
+    todayEl.textContent = new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
   }
-  $('#vidas') && ($('#vidas').textContent = vidas);
-  $('#nivel') && ($('#nivel').textContent = calcNivel());
-  $('#xpHoy') && ($('#xpHoy').textContent = todayXP());
+  const vidasEl = $('#vidas'); if(vidasEl) vidasEl.textContent = vidas;
+  const nivelEl = $('#nivel'); if(nivelEl) nivelEl.textContent = calcNivel();
+  const xpHoyEl = $('#xpHoy'); if(xpHoyEl) xpHoyEl.textContent = todayXP();
+
   const w = xpWeekNow();
-  $('#xpSemana') && ($('#xpSemana').textContent = w);
-  $('#metaText') && ($('#metaText').textContent = `${w} / ${cfg.metaSemanal}`);
+  const xpSemEl = $('#xpSemana'); if(xpSemEl) xpSemEl.textContent = w;
+  const metaEl = $('#metaText'); if(metaEl) metaEl.textContent = `${w} / ${cfg.metaSemanal}`;
 
-  const pct = Math.min(100, Math.round(w*100/cfg.metaSemanal));
-  const bar = $('#barSemana');
-  if(bar){
-    bar.style.width = pct + '%';
-    bar.style.background = 'var(--btn)';
-  }
-
-  const cl = classFromLast14d();
-  const ct = $('#classTitle'); if(ct) ct.textContent = `Clase: ${cl}`;
+  const pct = Math.min(100, Math.round(w*100/Math.max(1,cfg.metaSemanal)));
+  const bar = $('#barSemana'); if(bar){ bar.style.width = pct + '%'; bar.style.background = 'var(--btn)'; }
 
   renderRewards(w);
   renderQuest();
@@ -268,11 +191,11 @@ function renderHeader(){
 }
 
 function renderHabitos(){
-  const cont = $('#habitosList'); 
-  if(!cont) return;
+  const cont = $('#habitosList'); if(!cont) return;
   cont.innerHTML='';
   const log = getLog(ymd(today));
   const quest = getTodayQuest();
+
   cfg.habitos.forEach(h=>{
     const row = document.createElement('div'); row.className='habit'+(log[h.id]===true?' done':'');
     const cb = document.createElement('input'); cb.type='checkbox'; cb.checked = log[h.id]===true;
@@ -281,9 +204,8 @@ function renderHabitos(){
       if(cb.checked) l[h.id]=true; else delete l[h.id];
       setLog(ymd(today),l); renderHeader(); renderHabitos();
     });
-    const label = document.createElement('div');
-    const bonus = (quest.type==='double' && quest.targetId===h.id) ? ' <span class="tiny" style="opacity:.85">(+ Doble XP hoy)</span>' : '';
-    label.innerHTML = `<strong>${h.label}</strong>${bonus}<div class="tiny muted">+${h.xp} XP / <span style="color:#ffd3c2">-${h.penalty}</span></div>`;
+    const bonus = (quest.type==='double' && quest.targetId===h.id) ? ' <span class="tiny" style="opacity:.85">(Doble XP)</span>' : '';
+    const label = document.createElement('div'); label.innerHTML = `<strong>${h.label}</strong>${bonus}<div class="tiny muted">+${h.xp} XP / <span style="color:#ffd3c2">-${h.penalty}</span></div>`;
     const fail = document.createElement('button'); fail.className='btn'; fail.textContent='Fallar';
     fail.addEventListener('click', ()=>{
       const l=getLog(ymd(today)); l[h.id]=false; setLog(ymd(today),l); renderHeader(); renderHabitos();
@@ -306,49 +228,65 @@ function renderRewards(total){
     list.appendChild(li);
   });
   const faltan = Math.max(0, cfg.umbralComida - total);
-  const hint = $('#recompensaHint');
-  if(hint){
-    hint.textContent = faltan>0 
-      ? `Te faltan al menos ${faltan} XP para alcanzar una recompensa.` 
-      : `¡Recompensas desbloqueadas!`;
+  const hint = $('#recompensaHint'); if(hint){
+    hint.textContent = faltan>0 ? `Te faltan ${faltan} XP para comida libre.` : `¡Recompensas desbloqueadas!`;
   }
 }
 
+// --- Quest & Stats (no fallan si no existe el HTML) ---
 function renderQuest(){
   const q = getTodayQuest();
-  const qt = $('#questText'); const qs = $('#questStatus');
-  if(!qt || !qs) return;
-  qt.textContent = q.text;
-  if(q.type==='deadline'){
-    qs.textContent = 'Reto activo: 4 hábitos antes de las 21:00 (+20 XP).';
-  }else if(q.type==='double'){
-    const h = cfg.habitos.find(x=>x.id===q.targetId);
-    qs.textContent = h ? `Bonus en: ${h.label}` : '';
-  }else{
-    qs.textContent = '';
+  const qt = $('#questText'); if(qt) qt.textContent = q.text;
+  const qs = $('#questStatus');
+  if(qs){
+    if(q.type==='deadline') qs.textContent = 'Reto: 4 hábitos antes de las 21:00 (+20 XP).';
+    else if(q.type==='double'){
+      const h = cfg.habitos.find(x=>x.id===q.targetId);
+      qs.textContent = h ? `Bonus en: ${h.label}` : '';
+    } else qs.textContent = '';
   }
 }
-
+function statsToday(){
+  const log = getLog(ymd(today));
+  let energia=0, conocimiento=0, sabiduria=0, vitalidad=0;
+  for(const h of cfg.habitos){
+    if(log[h.id]===true){
+      if(h.attr==='energia') energia+=h.xp;
+      if(h.attr==='conocimiento') conocimiento+=h.xp;
+      if(h.attr==='sabiduria') sabiduria+=h.xp;
+      if(h.attr==='vitalidad') vitalidad+=h.xp;
+    }else if(log[h.id]===false){
+      const p=Math.round(h.penalty/3);
+      if(h.attr==='energia') energia-=p;
+      if(h.attr==='conocimiento') conocimiento-=p;
+      if(h.attr==='sabiduria') sabiduria-=p;
+      if(h.attr==='vitalidad') vitalidad-=p;
+    }
+  }
+  const maxDia = cfg.habitos.reduce((a,b)=>a+b.xp,0) || 1;
+  const pct = v => Math.max(0,Math.min(100,Math.round(v*100/maxDia)));
+  return { energia:pct(energia), conocimiento:pct(conocimiento), sabiduria:pct(sabiduria), vitalidad:pct(vitalidad) };
+}
 function renderStats(){
   const st = statsToday();
-  const set = (id,val)=>{ const el=$(id); if(el) el.style.width = Math.max(0,Math.min(100,val)) + '%'; };
+  const set = (sel,val)=>{ const el=$(sel); if(el) el.style.width = Math.max(0,Math.min(100,val)) + '%'; };
   set('#statEnergia', st.energia);
   set('#statConocimiento', st.conocimiento);
   set('#statSabiduria', st.sabiduria);
   set('#statVitalidad', st.vitalidad);
-  const hint = $('#statsHint');
-  if(hint){
+  const hint = $('#statsHint'); if(hint){
     hint.textContent = `Hoy: 💪 ${st.energia}% · 🧠 ${st.conocimiento}% · 💰 ${st.sabiduria}% · 🍎 ${st.vitalidad}%`;
   }
 }
 
 // ---- Config UI
-function openConfig(open=true){ const p=$('#panelConfig'); if(p) p.hidden = !open; if(open) fillConfig(); }
+function openConfig(open=true){ const p=$('#panelConfig'); if(p){ p.hidden = !open; if(open) fillConfig(); } }
 function fillConfig(){
-  $('#metaSemanal') && ($('#metaSemanal').value = cfg.metaSemanal);
-  $('#umbralComida') && ($('#umbralComida').value = cfg.umbralComida);
-  $('#umbralCerveza') && ($('#umbralCerveza').value = cfg.umbralCerveza);
-  $('#vidasInput') && ($('#vidasInput').value = vidas);
+  const setVal = (sel,val)=>{ const el=$(sel); if(el) el.value = val; };
+  setVal('#metaSemanal', cfg.metaSemanal);
+  setVal('#umbralComida', cfg.umbralComida);
+  setVal('#umbralCerveza', cfg.umbralCerveza);
+  setVal('#vidasInput', vidas);
   renderCfgTable();
 }
 function renderCfgTable(){
@@ -394,9 +332,9 @@ function wireIntro(){
   const remember = $('#rememberMe');
   const seen = localStorage.getItem(K.introSeen) === '1';
 
-  if(!seen && intro){ intro.hidden = false; }
-  else if(intro){ intro.hidden = true; }
+  if(intro){ intro.hidden = !!seen; }
 
+  // avatar preview existente
   const data = localStorage.getItem(K.avatar);
   const prev = $('#introAvatarPreview');
   if(data && prev){
@@ -435,20 +373,56 @@ function wireIntro(){
   }
 }
 
+// ---- Botones superiores
+document.getElementById('btnConfig')?.addEventListener('click', ()=> openConfig(true));
+document.getElementById('closeConfig')?.addEventListener('click', ()=> openConfig(false));
+document.getElementById('btnResetDia')?.addEventListener('click', ()=>{
+  localStorage.removeItem(K.log + ymd(today));
+  renderHeader(); renderHabitos();
+});
+document.getElementById('btnResumen')?.addEventListener('click', ()=>{
+  const r = document.getElementById('resumenContent');
+  if(r) r.innerHTML = weeklyReportHTML();
+  const p = document.getElementById('panelResumen');
+  if(p) p.hidden = false;
+});
+document.getElementById('closeResumen')?.addEventListener('click', ()=>{
+  const p = document.getElementById('panelResumen');
+  if(p) p.hidden = true;
+});
+
+document.getElementById('metaSemanal')?.addEventListener('change', e=>{ cfg.metaSemanal=+e.target.value||500; saveCfg(); renderHeader(); });
+document.getElementById('umbralComida')?.addEventListener('change', e=>{ cfg.umbralComida=+e.target.value||300; saveCfg(); renderHeader(); });
+document.getElementById('umbralCerveza')?.addEventListener('change', e=>{ cfg.umbralCerveza=+e.target.value||500; saveCfg(); renderHeader(); });
+document.getElementById('vidasInput')?.addEventListener('change', e=>{
+  vidas = Math.max(0, Math.min(cfg.maxVidas, +e.target.value||vidas));
+  localStorage.setItem(K.lives, String(vidas));
+  renderHeader();
+});
+document.getElementById('addHab')?.addEventListener('click', ()=>{
+  const nameEl=document.getElementById('newHabName');
+  const xpEl=document.getElementById('newHabXP');
+  const penEl=document.getElementById('newHabPenalty');
+  const name=(nameEl?.value||'').trim(); const xp=parseInt(xpEl?.value||'0',10);
+  const pen=parseInt(penEl?.value||'0',10);
+  if(!name || xp<=0) return;
+  cfg.habitos.push({id:'h'+Date.now(), label:name, xp:xp, penalty:pen, attr:'conocimiento'});
+  saveCfg(); if(nameEl) nameEl.value=''; if(xpEl) xpEl.value=''; if(penEl) penEl.value='';
+  renderCfgTable(); renderHabitos(); renderHeader();
+});
+
 // ---- Instalación PWA
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e)=>{
-  e.preventDefault(); deferredPrompt = e; 
-  const btn = document.getElementById('btnInstall'); 
-  if(btn){
-    btn.hidden=false;
-    btn.onclick = async ()=>{
-      btn.hidden = true;
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-      deferredPrompt = null;
-    };
-  }
+  e.preventDefault(); deferredPrompt = e; const btn = document.getElementById('btnInstall');
+  if(!btn) return;
+  btn.hidden=false;
+  btn.onclick = async ()=>{
+    btn.hidden = true;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  };
 });
 
 // ---- Resumen semanal
@@ -472,83 +446,12 @@ function weeklyReportHTML(){
   return `<table class="table"><tr><th>Día</th><th>XP</th><th>Detalles</th></tr>${rows}<tr><td><b>Total</b></td><td><b>${total} XP</b></td><td>${unlocked}</td></tr></table>`;
 }
 
-// ---- Cierre del día (narrativa)
-function cierreDelDiaHTML(){
-  const xp = todayXP();
-  const st = statsToday();
-  const cl = classFromLast14d();
-  const frases = [
-    `Hoy forjaste tu ${cl.toLowerCase()}: 💪${st.energia}% 🧠${st.conocimiento}% 💰${st.sabiduria}% 🍎${st.vitalidad}%.`,
-    xp>0 ? `Sumaste ${xp} XP. Tu versión subió un poco el nivel.` : `No sumaste XP hoy, pero mañana hay revancha.`,
-    `Cada hábito es +1% de futuro.`
-  ];
-  return `<p class="tiny">${frases.join(' ')}</p>`;
-}
-
 // ---- Init
 document.addEventListener('DOMContentLoaded',()=>{
-  const on = (id, evt, fn) => {
-    const el = document.getElementById(id);
-    if(el) el.addEventListener(evt, fn);
-  };
-
-  const d = document.getElementById('todayLabel');
-  if(d){
-    d.textContent = new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
-  }
-
+  const tl = document.getElementById('todayLabel');
+  if(tl) tl.textContent = new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
   renderAvatar();
   renderHeader();
   renderHabitos();
   wireIntro();
-
-  // Botones superiores y config
-  on('btnConfig','click', ()=> openConfig(true));
-  on('closeConfig','click', ()=> openConfig(false));
-  on('btnResetDia','click', ()=>{
-    localStorage.removeItem(K.log + ymd(today));
-    renderHeader(); renderHabitos();
-  });
-  on('btnResumen','click', ()=>{
-    const c = document.getElementById('resumenContent');
-    const p = document.getElementById('panelResumen');
-    if(c) c.innerHTML = weeklyReportHTML();
-    if(p) p.hidden = false;
-  });
-  on('closeResumen','click', ()=> {
-    const p = document.getElementById('panelResumen');
-    if(p) p.hidden = true;
-  });
-
-  on('btnCierre','click', ()=>{
-    const p = document.getElementById('panelCierre');
-    const c = document.getElementById('cierreNarrativa');
-    if(c) c.innerHTML = cierreDelDiaHTML();
-    if(p) p.hidden = false;
-  });
-  on('closeCierre','click', ()=> {
-    const p = document.getElementById('panelCierre');
-    if(p) p.hidden = true;
-  });
-
-  on('metaSemanal','change', e=>{ cfg.metaSemanal=+e.target.value||500; saveCfg(); renderHeader(); });
-  on('umbralComida','change', e=>{ cfg.umbralComida=+e.target.value||300; saveCfg(); renderHeader(); });
-  on('umbralCerveza','change', e=>{ cfg.umbralCerveza=+e.target.value||500; saveCfg(); renderHeader(); });
-  on('vidasInput','change', e=>{
-    vidas = Math.max(0, Math.min(cfg.maxVidas, +e.target.value||vidas));
-    localStorage.setItem(K.lives, String(vidas));
-    renderHeader();
-  });
-  on('addHab','click', ()=>{
-    const nameEl=document.getElementById('newHabName');
-    const xpEl=document.getElementById('newHabXP');
-    const penEl=document.getElementById('newHabPenalty');
-    const name=nameEl?.value.trim();
-    const xp=parseInt(xpEl?.value||'0',10);
-    const pen=parseInt(penEl?.value||'0',10);
-    if(!name || xp<=0) return;
-    cfg.habitos.push({id:'h'+Date.now(), label:name, xp:xp, penalty:pen, attr:'conocimiento'});
-    saveCfg(); if(nameEl) nameEl.value=''; if(xpEl) xpEl.value=''; if(penEl) penEl.value='';
-    renderCfgTable(); renderHabitos(); renderHeader();
-  });
 });
