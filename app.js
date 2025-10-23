@@ -127,7 +127,7 @@ function renderHabitos(){
       setLog(ymd(today),l); renderHeader(); renderHabitos();
     });
     const label = document.createElement('div'); label.innerHTML = `<strong>${h.label}</strong><div class="tiny muted">+${h.xp} XP / <span style="color:#ff9aa6">-${h.penalty}</span></div>`;
-    const fail = document.createElement('button'); fail.className='btn secondary'; fail.textContent='Fallar';
+    const fail = document.createElement('button'); fail.className='btn'; fail.textContent='Fallar';
     fail.addEventListener('click', ()=>{
       const l=getLog(ymd(today)); l[h.id]=false; setLog(ymd(today),l); renderHeader(); renderHabitos();
     });
@@ -167,7 +167,7 @@ function renderCfgTable(){
       <td><input data-i="${i}" data-k="label" value="${h.label}"></td>
       <td><input type="number" data-i="${i}" data-k="xp" value="${h.xp}"></td>
       <td><input type="number" data-i="${i}" data-k="penalty" value="${h.penalty}"></td>
-      <td><button class="btn ghost" data-del="${i}">Eliminar</button></td>
+      <td><button class="btn" data-del="${i}">Eliminar</button></td>
     `;
     t.appendChild(tr);
   });
@@ -254,4 +254,3 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
   renderHeader(); renderHabitos();
 });
-
