@@ -176,6 +176,29 @@ input[type="text"],input[type="number"],input[type="file"]{
 /* Intro */
 .intro-grid{ display:grid; grid-template-columns:110px 1fr; gap:14px; align-items:center; }
 
+/* ========= Quest & Stats ========= */
+.quest{
+  margin-top:12px;
+  background: rgba(255,255,255,.08);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.quest-title{ font-weight:700; }
+.quest-text{ margin-top:6px; }
+.quest-status{ margin-top:2px; }
+
+.stats{ display:grid; grid-template-columns:1fr; gap:12px; margin-top:10px; }
+.stat-label{ margin-bottom:6px; }
+.stat-bar{
+  height:12px; background: rgba(255,255,255,.18);
+  border-radius: 999px; overflow:hidden; border:1px solid rgba(0,0,0,.1);
+}
+.stat-fill{
+  height:100%; width:0%;
+  background: var(--btn);
+  transition: width .3s ease;
+}
+
 /* ========= Responsive ========= */
 @media (max-width: 780px){
   .kpi{ grid-template-columns: repeat(2, minmax(120px,1fr)); }
