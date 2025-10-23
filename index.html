@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>UN DÍA DE DEIVID</title>
 
-  <!-- Montserrat -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+  <!-- Luxury font -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- PWA / Themecolor -->
+  <!-- PWA / Theme -->
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#D9DBDF" />
+  <meta name="theme-color" content="#EEE9DF" />
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -97,31 +97,29 @@
     </div>
   </section>
 
-  <!-- Intro (primera vez) -->
-  <section id="panelIntro" class="sheet" hidden>
+  <!-- Intro / Bienvenida -->
+  <section id="introSheet" class="sheet" hidden>
     <div class="sheet-inner">
       <h3>Bienvenido</h3>
       <p class="tiny">
         <b>UN DÍA DE DEIVID</b> es tu juego de hábitos. Marca tus logros diarios, suma XP y desbloquea recompensas semanales.
-        Tu objetivo: mantener constancia, subir de nivel y mejorar tus hábitos.
+        Tu objetivo: constancia, disciplina y mejora continua.
       </p>
 
       <div class="intro-grid">
-        <div>
-          <div id="introAvatarPreview" class="avatar bigavatar"><span>DV</span></div>
-        </div>
+        <div><div id="introAvatarPreview" class="avatar bigavatar"><span>DV</span></div></div>
         <div>
           <label class="tiny">Tu avatar (opcional):</label>
-          <input id="introAvatarInput" type="file" accept="image/*">
+          <input id="avatarInput" type="file" accept="image/*">
           <p class="tiny muted">Se guarda solo en este dispositivo.</p>
           <label class="tiny row" style="gap:8px;margin-top:8px">
-            <input id="introNoShow" type="checkbox" checked> No volver a mostrar
+            <input id="rememberMe" type="checkbox" checked> No volver a mostrar
           </label>
         </div>
       </div>
 
       <div class="row end" style="margin-top:12px">
-        <button id="introStart" class="btn">Empezar</button>
+        <button id="btnStart" class="btn">Empezar</button>
       </div>
     </div>
   </section>
