@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>UN DÍA DE DEIVID</title>
 
-  <!-- Luxury font -->
+  <!-- Tipografía -->
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- PWA / Theme -->
+  <!-- PWA -->
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#EEE9DF" />
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -32,7 +32,7 @@
           <div>
             <div class="muted tiny">Hoy</div>
             <div id="todayLabel" class="big"></div>
-            <div class="tiny muted" id="classTitle">Clase: —</div>
+            <div id="classTitle" class="tiny muted">Clase: —</div>
           </div>
         </div>
         <div class="kpi">
@@ -42,6 +42,7 @@
           <div><div class="tiny muted">XP semana</div><div id="xpSemana" class="big">0</div></div>
         </div>
       </div>
+
       <div class="progress"><div id="barSemana" class="bar"></div></div>
       <div id="metaText" class="tiny muted">0 / 500</div>
       <div id="recompensaHint" class="hint tiny">Suma XP para desbloquear recompensas.</div>
@@ -61,7 +62,7 @@
       </div>
     </section>
 
-    <!-- Atributos del personaje -->
+    <!-- Stats -->
     <section class="card">
       <h2>Stats del personaje</h2>
       <div class="stats">
@@ -82,7 +83,7 @@
           <div class="stat-bar"><div id="statVitalidad" class="stat-fill"></div></div>
         </div>
       </div>
-      <p class="tiny muted" id="statsHint">Los hábitos de hoy alimentan tus atributos.</p>
+      <p id="statsHint" class="tiny muted">Los hábitos de hoy alimentan tus atributos.</p>
     </section>
 
     <!-- Hábitos -->
@@ -140,15 +141,13 @@
     </div>
   </section>
 
-  <!-- Intro / Bienvenida -->
+  <!-- Intro -->
   <section id="introSheet" class="sheet" hidden>
     <div class="sheet-inner">
       <h3>Bienvenido</h3>
       <p class="tiny">
         <b>UN DÍA DE DEIVID</b> es tu juego de hábitos. Marca tus logros diarios, suma XP y desbloquea recompensas semanales.
-        Tu objetivo: constancia, disciplina y mejora continua.
       </p>
-
       <div class="intro-grid">
         <div><div id="introAvatarPreview" class="avatar bigavatar"><span>DV</span></div></div>
         <div>
@@ -160,7 +159,6 @@
           </label>
         </div>
       </div>
-
       <div class="row end" style="margin-top:12px">
         <button id="btnStart" class="btn">Empezar</button>
       </div>
