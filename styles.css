@@ -1,14 +1,14 @@
 :root{
   /* Oxford Classic */
   --bg:#D9DBDF;            /* fondo gris */
-  --card:#14202E;          /* azul Oxford (tarjetas) */
-  --ink:#14202E;           /* azul para textos generales */
-  --text-on-card:#FFFFFF;  /* texto dentro de tarjetas */
+  --card:#14202E;          /* azul Oxford (tarjetas y modales) */
+  --ink:#14202E;           /* azul para textos generales (fuera de tarjetas) */
+  --text-on-card:#FFFFFF;  /* texto dentro de tarjetas y modales */
   --muted:#5E6875;         /* gris textos secundarios */
   --edge:#2B4257;          /* borde azul grisáceo */
   --accent:#E3B23C;        /* AMARILLO OXFORD (barra) */
 
-  /* Botones (todos como 'Resumen') */
+  /* Botones (todos iguales) */
   --btn:#BFC4CB;           /* gris botón */
   --btn-border:#AAB1BA;    /* borde botón */
 }
@@ -21,9 +21,10 @@ body{
   color: var(--ink);
 }
 
+/* Topbar con card color para uniformidad si quieres */
 .topbar{
   position:sticky; top:0; z-index:10;
-  background: rgba(20,32,46,.9);
+  background: var(--card);
   border-bottom:1px solid var(--edge);
   padding:12px 16px; display:flex; justify-content:space-between; align-items:center;
 }
@@ -31,6 +32,7 @@ body{
 
 .wrap{max-width:980px;margin:auto;padding:16px;display:grid;gap:14px}
 
+/* Tarjetas (mismo look en todas las secciones) */
 .card{
   background: var(--card);
   color: var(--text-on-card);
@@ -48,7 +50,7 @@ body{
 .muted{color:#c9ced6}
 .bullets{margin:8px 0 0 18px}
 
-/* === TODOS LOS BOTONES IGUALES AL DE 'RESUMEN' === */
+/* TODOS los botones iguales */
 .btn{
   background: var(--btn);
   color: var(--ink);
@@ -66,26 +68,31 @@ body{
 }
 .bar{height:100%;width:0;background:var(--accent);transition:width .25s}
 
+/* Lista de hábitos */
 .list .habit{
   display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;
   border:1px solid var(--edge);border-radius:12px;padding:10px;margin:8px 0;
-  background: rgba(255,255,255,.03)
+  background: rgba(255,255,255,.03); color: var(--text-on-card);
 }
 .list .habit.done{outline:2px solid var(--accent);}
 
-.table{width:100%;border-collapse:collapse;margin-top:8px}
+/* Tablas y hints dentro de cards/modales */
+.table{width:100%;border-collapse:collapse;margin-top:8px; color:var(--text-on-card)}
 .table th,.table td{padding:8px;border-bottom:1px solid var(--edge)}
-
 .hint{border-left:3px solid var(--edge);padding-left:8px;margin-top:6px;color:#EDEFF3}
 
-/* Sheets (modales) */
+/* === Modales (sheets) — MISMO ESTILO QUE LAS TARJETAS === */
 .sheet{
-  position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:flex-end
+  position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:flex-end
 }
 .sheet[hidden]{ display:none !important; }
 .sheet-inner{
-  width:100%;max-width:980px;margin:0 auto;background:#0f1226;padding:16px 16px 24px;
-  border-top-left-radius:16px;border-top-right-radius:16px;border:1px solid var(--edge); color:#fff;
+  width:100%;max-width:980px;margin:0 auto;
+  background: var(--card);            /* mismo azul Oxford */
+  color: var(--text-on-card);         /* texto blanco */
+  padding:16px 16px 24px;
+  border-top-left-radius:16px;border-top-right-radius:16px;
+  border:1px solid var(--edge);
 }
 @media (min-width:880px){
   .sheet{align-items:center}
