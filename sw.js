@@ -1,4 +1,4 @@
-const CACHE = 'uddd-luxury-theme-v3'; // subir versión para limpiar caché
+const CACHE = 'uddd-luxury-theme-v4'; // nueva versión para limpiar caché
 const ASSETS = [
   './','./index.html','./styles.css','./app.js',
   './manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'
