@@ -1,16 +1,17 @@
 :root{
-  /* Oxford Classic */
-  --bg:#D9DBDF;            /* fondo gris */
-  --card:#14202E;          /* azul Oxford (tarjetas y modales) */
-  --ink:#14202E;           /* azul para textos generales (fuera de tarjetas) */
-  --text-on-card:#FFFFFF;  /* texto dentro de tarjetas y modales */
-  --muted:#5E6875;         /* gris textos secundarios */
-  --edge:#2B4257;          /* borde azul grisáceo */
-  --accent:#E3B23C;        /* AMARILLO OXFORD (barra) */
+  /* Paleta solicitada */
+  --bg:#F0EDE5;           /* fondo app */
+  --card:#2F4C73;         /* tarjetas grandes + topbar + modales */
+  --habit-card:#A0B1DD;   /* cuadros de hábitos */
+  --ink:#1E2A39;          /* texto general sobre fondo claro */
+  --text-on-card:#FFFFFF; /* texto en tarjetas/modales (fondo oscuro) */
+  --muted:#6F7682;        /* texto secundario */
+  --edge:#223A5A;         /* bordes sobre fondos oscuros */
 
-  /* Botones (todos iguales) */
-  --btn:#BFC4CB;           /* gris botón */
-  --btn-border:#AAB1BA;    /* borde botón */
+  /* Botones y progreso (amarillo) */
+  --btn:#D9B343;
+  --btn-border:#B8962F;
+  --accent:#D9B343;       /* barra de progreso */
 }
 
 *{box-sizing:border-box}
@@ -19,29 +20,33 @@ body{
   font-family:"Montserrat",system-ui,-apple-system,Segoe UI,Roboto,Arial;
   background: var(--bg);
   color: var(--ink);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
 }
 
-/* Topbar: TÍTULO CENTRADO y botón a la derecha */
+/* Topbar con título centrado y botón a la derecha */
 .topbar{
   position:sticky; top:0; z-index:10;
   background: var(--card);
   border-bottom:1px solid var(--edge);
   padding:12px 16px;
   display:flex; align-items:center; justify-content:center;
+  min-height:52px;
 }
 .topbar h1{
-  margin:0; color:#fff; font-size:1.16rem; text-align:center;
+  margin:0; color:#fff; font-size:1.18rem; text-align:center; font-weight:800;
 }
 #btnInstall{
   position:absolute; right:16px;
-  background: var(--btn); color: var(--ink);
+  background: var(--btn); color:#1A1A1A;
   border:1px solid var(--btn-border);
   padding:8px 12px; border-radius:10px; font-weight:600;
 }
 
+/* Layout principal */
 .wrap{max-width:980px;margin:auto;padding:16px;display:grid;gap:14px}
 
-/* Tarjetas */
+/* Tarjetas grandes (estado, hábitos, recompensas) */
 .card{
   background: var(--card);
   color: var(--text-on-card);
@@ -51,30 +56,28 @@ body{
 }
 
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.idwrap{display:flex;align-items:center;gap:10px}
 .gap{gap:8px}
 .end{justify-content:flex-end}
 .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .big{font-weight:800;font-size:1.4rem}
 .tiny{font-size:.9rem}
-.muted{color:#c9ced6}
+.muted{color:#E2E6F0}
 .bullets{margin:8px 0 0 18px}
 
-/* Avatar */
+/* Avatar opcional */
+.idwrap{display:flex;align-items:center;gap:10px}
 .avatar{
   width:56px;height:56px;border-radius:50%;
-  background:#1c2a39;
-  display:grid;place-items:center;
-  border:2px solid var(--edge);
-  overflow:hidden;
+  background:#1c2a39; display:grid;place-items:center;
+  border:2px solid var(--edge); overflow:hidden;
 }
 .avatar span{color:#fff;font-weight:800}
 .bigavatar{width:84px;height:84px}
 
-/* Botones */
+/* Botones (todos iguales, amarillo) */
 .btn{
   background: var(--btn);
-  color: var(--ink);
+  color:#1A1A1A;
   border:1px solid var(--btn-border);
   padding:10px 14px;border-radius:10px;font-weight:600;
   cursor:pointer; user-select:none;
@@ -82,27 +85,29 @@ body{
 .btn:hover{ filter: brightness(0.97); }
 .btn:active{ filter: brightness(0.94); }
 
-/* Barra de progreso (relleno amarillo fijo) */
+/* Barra de progreso (amarilla) */
 .progress{
-  height:10px;background:#E4E7EC;border-radius:999px;overflow:hidden;
+  height:10px;background:#E9E6DC;border-radius:999px;overflow:hidden;
   border:1px solid var(--edge);margin:8px 0
 }
 .bar{height:100%;width:0;background:var(--accent);transition:width .25s}
 
-/* Lista de hábitos */
+/* Cuadros de HÁBITOS (dentro de tarjeta azul) */
 .list .habit{
   display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;
-  border:1px solid var(--edge);border-radius:12px;padding:10px;margin:8px 0;
-  background: rgba(255,255,255,.03); color: var(--text-on-card);
+  border:1px solid #6E7EB8;          /* borde acorde al azul claro */
+  border-radius:12px;padding:10px;margin:8px 0;
+  background: var(--habit-card);
+  color:#0E1A2A;                       /* texto oscuro para contraste */
 }
 .list .habit.done{outline:2px solid var(--accent);}
 
 /* Tablas y hints dentro de cards/modales */
 .table{width:100%;border-collapse:collapse;margin-top:8px; color:var(--text-on-card)}
 .table th,.table td{padding:8px;border-bottom:1px solid var(--edge)}
-.hint{border-left:3px solid var(--edge);padding-left:8px;margin-top:6px;color:#EDEFF3}
+.hint{border-left:3px solid var(--edge);padding-left:8px;margin-top:6px;color:#F7F4E7}
 
-/* Sheets (modales) */
+/* Modales (sheets) visualmente idénticos a las tarjetas */
 .sheet{
   position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:flex-end
 }
@@ -121,10 +126,14 @@ body{
 }
 
 /* Intro layout */
-.intro-grid{
-  display:grid;grid-template-columns:100px 1fr;gap:14px;margin-top:10px
+.intro-grid{display:grid;grid-template-columns:100px 1fr;gap:14px;margin-top:10px}
+@media (max-width:600px){
+  /* Correcciones MÓVIL: centrado y mejor flujo */
+  .row{flex-wrap:wrap;justify-content:center;text-align:center}
+  .kpi{grid-template-columns:repeat(2,1fr)}
+  .idwrap{justify-content:center}
+  .bullets{margin-left:0}
+  .wrap{padding:12px}
+  #btnInstall{right:12px}
+  .intro-grid{grid-template-columns:1fr;justify-items:center}
 }
-@media (max-width:480px){
-  .intro-grid{grid-template-columns:1fr}
-}
-
