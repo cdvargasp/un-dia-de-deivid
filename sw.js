@@ -29,6 +29,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;
 
+  // Navegación/HTML
   if (req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html')) {
     event.respondWith(
       fetch(req)
@@ -42,6 +43,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Estáticos
   event.respondWith(
     caches.match(req).then(cached => {
       const fetchPromise = fetch(req)
