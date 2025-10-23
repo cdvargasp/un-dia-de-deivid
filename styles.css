@@ -1,139 +1,125 @@
 :root{
-  /* Paleta solicitada */
-  --bg:#F0EDE5;           /* fondo app */
-  --card:#2F4C73;         /* tarjetas grandes + topbar + modales */
-  --habit-card:#A0B1DD;   /* cuadros de hábitos */
-  --ink:#1E2A39;          /* texto general sobre fondo claro */
-  --text-on-card:#FFFFFF; /* texto en tarjetas/modales (fondo oscuro) */
-  --muted:#6F7682;        /* texto secundario */
-  --edge:#223A5A;         /* bordes sobre fondos oscuros */
-
-  /* Botones y progreso (amarillo) */
-  --btn:#D9B343;
-  --btn-border:#B8962F;
-  --accent:#D9B343;       /* barra de progreso */
+  /* Paleta elegante */
+  --bg:#EEE9DF;            /* fondo general */
+  --card:#1B2632;          /* tarjetas grandes */
+  --habit-card:#2C3B4D;    /* cuadros de hábitos */
+  --btn:#FFB162;           /* botones */
+  --btn-border:#A35139;    /* borde botón */
+  --accent:#A35139;        /* barra progreso y detalles */
+  --text-dark:#1B2632;     /* texto oscuro */
+  --text-light:#FFFFFF;    /* texto claro */
+  --muted:#C9C1B1;         /* texto secundario */
 }
 
-*{box-sizing:border-box}
-html,body{margin:0;height:100%}
-body{
-  font-family:"Montserrat",system-ui,-apple-system,Segoe UI,Roboto,Arial;
-  background: var(--bg);
-  color: var(--ink);
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:"Playfair Display",serif;background:var(--bg);color:var(--text-dark);}
 
-/* Topbar con título centrado y botón a la derecha */
+/* Título superior centrado */
 .topbar{
-  position:sticky; top:0; z-index:10;
-  background: var(--card);
-  border-bottom:1px solid var(--edge);
-  padding:12px 16px;
-  display:flex; align-items:center; justify-content:center;
-  min-height:52px;
+  position:sticky;top:0;z-index:10;
+  background:var(--card);
+  display:flex;justify-content:center;align-items:center;
+  padding:14px 16px;
+  border-bottom:2px solid var(--accent);
 }
 .topbar h1{
-  margin:0; color:#fff; font-size:1.18rem; text-align:center; font-weight:800;
+  color:var(--text-light);
+  font-size:1.4rem;
+  font-weight:700;
+  letter-spacing:1px;
+  text-align:center;
 }
 #btnInstall{
-  position:absolute; right:16px;
-  background: var(--btn); color:#1A1A1A;
+  position:absolute;right:16px;
+  background:var(--btn);
+  color:var(--text-dark);
   border:1px solid var(--btn-border);
-  padding:8px 12px; border-radius:10px; font-weight:600;
+  padding:8px 12px;border-radius:8px;font-weight:600;
 }
 
-/* Layout principal */
-.wrap{max-width:980px;margin:auto;padding:16px;display:grid;gap:14px}
+/* Contenedor principal */
+.wrap{max-width:980px;margin:auto;padding:16px;display:grid;gap:16px}
 
-/* Tarjetas grandes (estado, hábitos, recompensas) */
+/* Tarjetas principales */
 .card{
-  background: var(--card);
-  color: var(--text-on-card);
-  border:1px solid var(--edge);
-  border-radius:14px; padding:14px;
-  box-shadow:0 8px 24px rgba(0,0,0,.18);
+  background:var(--card);
+  color:var(--text-light);
+  border:1px solid var(--accent);
+  border-radius:16px;
+  padding:18px;
+  box-shadow:0 8px 24px rgba(0,0,0,.25);
 }
 
-.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.gap{gap:8px}
-.end{justify-content:flex-end}
-.kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.big{font-weight:800;font-size:1.4rem}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;text-align:center}
+.big{font-weight:700;font-size:1.4rem}
 .tiny{font-size:.9rem}
-.muted{color:#E2E6F0}
-.bullets{margin:8px 0 0 18px}
+.muted{color:var(--muted)}
 
-/* Avatar opcional */
-.idwrap{display:flex;align-items:center;gap:10px}
+/* Botones */
+.btn{
+  background:var(--btn);
+  color:var(--text-dark);
+  border:1px solid var(--btn-border);
+  padding:10px 16px;border-radius:10px;font-weight:700;
+  cursor:pointer;
+  transition:all .2s ease;
+}
+.btn:hover{filter:brightness(1.05);}
+.btn:active{transform:scale(.98);}
+
+/* Progreso */
+.progress{
+  height:10px;background:#C9C1B1;border-radius:999px;overflow:hidden;
+  border:1px solid var(--accent);margin:8px 0
+}
+.bar{height:100%;width:0;background:var(--btn);transition:width .25s}
+
+/* Cuadros de hábitos */
+.list .habit{
+  display:grid;grid-template-columns:auto 1fr auto;
+  gap:8px;align-items:center;
+  border:1px solid var(--accent);
+  border-radius:12px;
+  padding:12px;
+  margin:8px 0;
+  background:var(--habit-card);
+  color:var(--text-light);
+}
+.list .habit.done{outline:2px solid var(--btn);}
+
+/* Avatar */
 .avatar{
   width:56px;height:56px;border-radius:50%;
-  background:#1c2a39; display:grid;place-items:center;
-  border:2px solid var(--edge); overflow:hidden;
+  background:var(--accent);
+  display:grid;place-items:center;
+  font-weight:700;color:var(--text-light);
+  border:2px solid var(--btn-border);
 }
-.avatar span{color:#fff;font-weight:800}
-.bigavatar{width:84px;height:84px}
 
-/* Botones (todos iguales, amarillo) */
-.btn{
-  background: var(--btn);
-  color:#1A1A1A;
-  border:1px solid var(--btn-border);
-  padding:10px 14px;border-radius:10px;font-weight:600;
-  cursor:pointer; user-select:none;
-}
-.btn:hover{ filter: brightness(0.97); }
-.btn:active{ filter: brightness(0.94); }
+/* Tablas, modales, intro */
+.table{width:100%;border-collapse:collapse;margin-top:8px;color:var(--text-light)}
+.table th,.table td{padding:8px;border-bottom:1px solid var(--accent)}
 
-/* Barra de progreso (amarilla) */
-.progress{
-  height:10px;background:#E9E6DC;border-radius:999px;overflow:hidden;
-  border:1px solid var(--edge);margin:8px 0
-}
-.bar{height:100%;width:0;background:var(--accent);transition:width .25s}
-
-/* Cuadros de HÁBITOS (dentro de tarjeta azul) */
-.list .habit{
-  display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;
-  border:1px solid #6E7EB8;          /* borde acorde al azul claro */
-  border-radius:12px;padding:10px;margin:8px 0;
-  background: var(--habit-card);
-  color:#0E1A2A;                       /* texto oscuro para contraste */
-}
-.list .habit.done{outline:2px solid var(--accent);}
-
-/* Tablas y hints dentro de cards/modales */
-.table{width:100%;border-collapse:collapse;margin-top:8px; color:var(--text-on-card)}
-.table th,.table td{padding:8px;border-bottom:1px solid var(--edge)}
-.hint{border-left:3px solid var(--edge);padding-left:8px;margin-top:6px;color:#F7F4E7}
-
-/* Modales (sheets) visualmente idénticos a las tarjetas */
 .sheet{
-  position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:flex-end
+  position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:flex-end;
 }
-.sheet[hidden]{ display:none !important; }
 .sheet-inner{
-  width:100%;max-width:980px;margin:0 auto;
-  background: var(--card);
-  color: var(--text-on-card);
-  padding:16px 16px 24px;
+  width:100%;max-width:980px;margin:auto;
+  background:var(--card);
+  color:var(--text-light);
   border-top-left-radius:16px;border-top-right-radius:16px;
-  border:1px solid var(--edge);
+  border:1px solid var(--accent);
+  padding:20px;
 }
 @media (min-width:880px){
   .sheet{align-items:center}
   .sheet-inner{border-radius:16px;max-height:90vh;overflow:auto}
 }
 
-/* Intro layout */
-.intro-grid{display:grid;grid-template-columns:100px 1fr;gap:14px;margin-top:10px}
+/* Responsive */
 @media (max-width:600px){
-  /* Correcciones MÓVIL: centrado y mejor flujo */
-  .row{flex-wrap:wrap;justify-content:center;text-align:center}
-  .kpi{grid-template-columns:repeat(2,1fr)}
-  .idwrap{justify-content:center}
-  .bullets{margin-left:0}
   .wrap{padding:12px}
-  #btnInstall{right:12px}
-  .intro-grid{grid-template-columns:1fr;justify-items:center}
+  .kpi{grid-template-columns:repeat(2,1fr)}
+  .row{justify-content:center;text-align:center}
+  .topbar h1{font-size:1.2rem}
 }
