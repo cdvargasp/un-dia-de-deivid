@@ -16,7 +16,7 @@ const K = {
   lives:'uddd_lives_v1',
   lastWeek:'uddd_last_week_v1',
   log:'uddd_log_', // + ymd
-  intro:'uddd_seen_intro_v1',
+  introSeen:'uddd_intro_seen_v1',
   avatar:'uddd_avatar_dataurl_v1'
 };
 
@@ -55,7 +55,7 @@ const weekNow = isoWeekId(today);
   localStorage.setItem(K.lastWeek, weekNow);
 })();
 
-// ---- Acceso logs
+// ---- Logs
 function getLog(d){ return JSON.parse(localStorage.getItem(K.log + d) || '{}'); }
 function setLog(d,obj){ localStorage.setItem(K.log + d, JSON.stringify(obj)); }
 
@@ -115,6 +115,7 @@ function renderAvatar(){
     if(!el.innerHTML.trim()) el.innerHTML = '<span>DV</span>';
   }
 }
+
 function renderHeader(){
   $('#todayLabel').textContent = new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
   $('#vidas').textContent = vidas;
@@ -127,10 +128,10 @@ function renderHeader(){
   const pct = Math.min(100, Math.round(w*100/cfg.metaSemanal));
   const bar = $('#barSemana');
   bar.style.width = pct + '%';
-  bar.style.background = 'var(--accent)'; // AMARILLO fijo
-
+  bar.style.background = 'var(--btn)'; // amarillo
   renderRewards(w);
 }
+
 function renderHabitos(){
   const cont = $('#habitosList'); cont.innerHTML='';
   const log = getLog(ymd(today));
@@ -142,7 +143,7 @@ function renderHabitos(){
       if(cb.checked) l[h.id]=true; else delete l[h.id];
       setLog(ymd(today),l); renderHeader(); renderHabitos();
     });
-    const label = document.createElement('div'); label.innerHTML = `<strong>${h.label}</strong><div class="tiny muted">+${h.xp} XP / <span style="color:#ff9aa6">-${h.penalty}</span></div>`;
+    const label = document.createElement('div'); label.innerHTML = `<strong>${h.label}</strong><div class="tiny muted">+${h.xp} XP / <span style="color:#ffd3c2">-${h.penalty}</span></div>`;
     const fail = document.createElement('button'); fail.className='btn'; fail.textContent='Fallar';
     fail.addEventListener('click', ()=>{
       const l=getLog(ymd(today)); l[h.id]=false; setLog(ymd(today),l); renderHeader(); renderHabitos();
@@ -150,6 +151,7 @@ function renderHabitos(){
     row.append(cb,label,fail); cont.appendChild(row);
   });
 }
+
 function renderRewards(total){
   const list = $('#rewardsList'); list.innerHTML='';
   const items = [
@@ -202,47 +204,57 @@ function renderCfgTable(){
 }
 function saveCfg(){ localStorage.setItem(K.cfg, JSON.stringify(cfg)); }
 
-// ---- Intro (primera vez) + Avatar
-function maybeOpenIntro(){
-  const seen = localStorage.getItem(K.intro)==='1';
-  if(!seen){ $('#panelIntro').hidden = false; }
-  // preview avatar si existe
+// ---- Intro (bienvenida) + avatar
+function wireIntro(){
+  const intro = $('#introSheet');
+  const btnStart = $('#btnStart');
+  const remember = $('#rememberMe');
+  const seen = localStorage.getItem(K.introSeen) === '1';
+
+  if(!seen && intro){ intro.hidden = false; }
+  else if(intro){ intro.hidden = true; }
+
+  // avatar preview existente
   const data = localStorage.getItem(K.avatar);
   const prev = $('#introAvatarPreview');
-  if(data){
+  if(data && prev){
     prev.style.backgroundImage = `url(${data})`;
     prev.style.backgroundSize = 'cover';
     prev.style.backgroundPosition = 'center';
     prev.innerHTML = '';
   }
-  // input
-  const inp = $('#introAvatarInput');
-  inp.onchange = async (e)=>{
-    const file = e.target.files && e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result;
-      localStorage.setItem(K.avatar, dataUrl);
-      // preview modal
-      const pv = $('#introAvatarPreview');
-      pv.style.backgroundImage = `url(${dataUrl})`;
-      pv.style.backgroundSize = 'cover';
-      pv.style.backgroundPosition = 'center';
-      pv.innerHTML = '';
-      // header
-      renderAvatar();
+
+  const inp = $('#avatarInput');
+  if(inp){
+    inp.onchange = e=>{
+      const file = e.target.files && e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        const dataUrl = reader.result;
+        localStorage.setItem(K.avatar, dataUrl);
+        // actualizar previews
+        if(prev){
+          prev.style.backgroundImage = `url(${dataUrl})`;
+          prev.style.backgroundSize = 'cover';
+          prev.style.backgroundPosition = 'center';
+          prev.innerHTML = '';
+        }
+        renderAvatar();
+      };
+      reader.readAsDataURL(file);
     };
-    reader.readAsDataURL(file);
-  };
-  // botón empezar
-  $('#introStart').onclick = ()=>{
-    if($('#introNoShow').checked) localStorage.setItem(K.intro,'1');
-    $('#panelIntro').hidden = true;
-  };
+  }
+
+  if(btnStart){
+    btnStart.onclick = ()=>{
+      if(remember && remember.checked) localStorage.setItem(K.introSeen,'1');
+      if(intro) intro.hidden = true;
+    };
+  }
 }
 
-// ---- Botones principales
+// ---- Botones superiores
 document.getElementById('btnConfig').onclick = ()=> openConfig(true);
 document.getElementById('closeConfig').onclick = ()=> openConfig(false);
 document.getElementById('btnResetDia').onclick = ()=>{
@@ -307,10 +319,10 @@ function weeklyReportHTML(){
 
 // ---- Init
 document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
+  document.getElementById('todayLabel').textContent =
+    new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
   renderAvatar();
   renderHeader();
   renderHabitos();
-  maybeOpenIntro();
+  wireIntro();
 });
-
