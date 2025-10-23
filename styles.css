@@ -1,43 +1,41 @@
 :root{
-  /* Paleta elegante */
+  /* Paleta (de tu imagen) */
   --bg:#EEE9DF;            /* fondo general */
-  --card:#1B2632;          /* tarjetas grandes */
+  --card:#1B2632;          /* tarjetas grandes + modales + topbar */
   --habit-card:#2C3B4D;    /* cuadros de hábitos */
-  --btn:#FFB162;           /* botones */
+  --btn:#FFB162;           /* botones y barra */
   --btn-border:#A35139;    /* borde botón */
-  --accent:#A35139;        /* barra progreso y detalles */
+  --accent:#A35139;        /* detalles/acento */
   --text-dark:#1B2632;     /* texto oscuro */
   --text-light:#FFFFFF;    /* texto claro */
   --muted:#C9C1B1;         /* texto secundario */
 }
 
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:"Playfair Display",serif;background:var(--bg);color:var(--text-dark);}
-
-/* Título superior centrado */
-.topbar{
-  position:sticky;top:0;z-index:10;
-  background:var(--card);
-  display:flex;justify-content:center;align-items:center;
-  padding:14px 16px;
-  border-bottom:2px solid var(--accent);
-}
-.topbar h1{
-  color:var(--text-light);
-  font-size:1.4rem;
-  font-weight:700;
-  letter-spacing:1px;
-  text-align:center;
-}
-#btnInstall{
-  position:absolute;right:16px;
-  background:var(--btn);
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  font-family:"Playfair Display",serif;
+  background:var(--bg);
   color:var(--text-dark);
-  border:1px solid var(--btn-border);
-  padding:8px 12px;border-radius:8px;font-weight:600;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
 }
 
-/* Contenedor principal */
+/* Topbar centrado */
+.topbar{
+  position:sticky; top:0; z-index:10;
+  background:var(--card);
+  border-bottom:2px solid var(--accent);
+  padding:14px 16px;
+  display:flex; align-items:center; justify-content:center;
+}
+.topbar h1{margin:0;color:var(--text-light);font-size:1.35rem;font-weight:700;letter-spacing:.5px;text-align:center}
+#btnInstall{
+  position:absolute; right:16px;
+  background:var(--btn); color:var(--text-dark);
+  border:1px solid var(--btn-border);
+  padding:8px 12px; border-radius:10px; font-weight:700;
+}
+
 .wrap{max-width:980px;margin:auto;padding:16px;display:grid;gap:16px}
 
 /* Tarjetas principales */
@@ -45,81 +43,72 @@ html,body{height:100%;font-family:"Playfair Display",serif;background:var(--bg);
   background:var(--card);
   color:var(--text-light);
   border:1px solid var(--accent);
-  border-radius:16px;
-  padding:18px;
+  border-radius:16px; padding:18px;
   box-shadow:0 8px 24px rgba(0,0,0,.25);
 }
 
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;text-align:center}
-.big{font-weight:700;font-size:1.4rem}
-.tiny{font-size:.9rem}
+.gap{gap:8px}
+.end{justify-content:flex-end}
+.kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.big{font-weight:700;font-size:1.35rem}
+.tiny{font-size:.95rem}
 .muted{color:var(--muted)}
+.bullets{margin:8px 0 0 18px}
+
+/* Avatar */
+.idwrap{display:flex;align-items:center;gap:10px}
+.avatar{width:56px;height:56px;border-radius:50%;background:var(--accent);display:grid;place-items:center;border:2px solid var(--btn-border);overflow:hidden}
+.avatar span{color:var(--text-light);font-weight:700}
+.bigavatar{width:84px;height:84px}
 
 /* Botones */
 .btn{
-  background:var(--btn);
-  color:var(--text-dark);
+  background:var(--btn); color:var(--text-dark);
   border:1px solid var(--btn-border);
-  padding:10px 16px;border-radius:10px;font-weight:700;
-  cursor:pointer;
-  transition:all .2s ease;
+  padding:10px 16px;border-radius:12px;font-weight:700;
+  cursor:pointer; transition:all .2s;
 }
-.btn:hover{filter:brightness(1.05);}
-.btn:active{transform:scale(.98);}
+.btn:hover{filter:brightness(1.05)}
+.btn:active{transform:scale(.98)}
 
-/* Progreso */
-.progress{
-  height:10px;background:#C9C1B1;border-radius:999px;overflow:hidden;
-  border:1px solid var(--accent);margin:8px 0
-}
+/* Progreso (amarillo) */
+.progress{height:10px;background:#DCCFBB;border-radius:999px;overflow:hidden;border:1px solid var(--accent);margin:8px 0}
 .bar{height:100%;width:0;background:var(--btn);transition:width .25s}
 
-/* Cuadros de hábitos */
+/* Hábitos */
 .list .habit{
-  display:grid;grid-template-columns:auto 1fr auto;
-  gap:8px;align-items:center;
+  display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;
   border:1px solid var(--accent);
-  border-radius:12px;
-  padding:12px;
-  margin:8px 0;
+  border-radius:12px;padding:12px;margin:8px 0;
   background:var(--habit-card);
   color:var(--text-light);
 }
-.list .habit.done{outline:2px solid var(--btn);}
+.list .habit.done{outline:2px solid var(--btn)}
 
-/* Avatar */
-.avatar{
-  width:56px;height:56px;border-radius:50%;
-  background:var(--accent);
-  display:grid;place-items:center;
-  font-weight:700;color:var(--text-light);
-  border:2px solid var(--btn-border);
-}
-
-/* Tablas, modales, intro */
+/* Tablas + tips */
 .table{width:100%;border-collapse:collapse;margin-top:8px;color:var(--text-light)}
 .table th,.table td{padding:8px;border-bottom:1px solid var(--accent)}
+.hint{border-left:3px solid var(--accent);padding-left:8px;margin-top:6px;color:#F2EDE6}
 
-.sheet{
-  position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:flex-end;
-}
+/* Modales (sheets) */
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:flex-end}
+.sheet[hidden]{display:none !important}
 .sheet-inner{
-  width:100%;max-width:980px;margin:auto;
-  background:var(--card);
-  color:var(--text-light);
-  border-top-left-radius:16px;border-top-right-radius:16px;
-  border:1px solid var(--accent);
-  padding:20px;
+  width:100%;max-width:980px;margin:auto;background:var(--card);color:var(--text-light);
+  border-top-left-radius:16px;border-top-right-radius:16px;border:1px solid var(--accent);padding:20px
 }
-@media (min-width:880px){
-  .sheet{align-items:center}
-  .sheet-inner{border-radius:16px;max-height:90vh;overflow:auto}
-}
+@media (min-width:880px){.sheet{align-items:center}.sheet-inner{border-radius:16px;max-height:90vh;overflow:auto}}
 
-/* Responsive */
+/* Intro layout */
+.intro-grid{display:grid;grid-template-columns:100px 1fr;gap:14px;margin-top:10px}
+
+/* Responsive móvil */
 @media (max-width:600px){
   .wrap{padding:12px}
-  .kpi{grid-template-columns:repeat(2,1fr)}
   .row{justify-content:center;text-align:center}
+  .kpi{grid-template-columns:repeat(2,1fr)}
+  .bullets{margin-left:0}
+  .intro-grid{grid-template-columns:1fr;justify-items:center}
   .topbar h1{font-size:1.2rem}
 }
