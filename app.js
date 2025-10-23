@@ -66,12 +66,10 @@ function getTodayQuest(){
   const existing = localStorage.getItem(key);
   if(existing) return JSON.parse(existing);
 
-  // tipos: double-xp, deadline
   const tipos = ['double','deadline'];
   const tipo = tipos[Math.floor(Math.random()*tipos.length)];
   let quest;
   if(tipo==='double'){
-    // elige un hábito al azar
     const target = cfg.habitos[Math.floor(Math.random()*cfg.habitos.length)];
     quest = {
       type:'double',
@@ -80,7 +78,6 @@ function getTodayQuest(){
       createdAt: Date.now()
     };
   }else{
-    // deadline 21:00
     quest = {
       type:'deadline',
       deadline:'21:00',
@@ -100,13 +97,11 @@ function todayXP(){
   for(const h of cfg.habitos){
     if(log[h.id]===true){
       let base = h.xp;
-      // bonus por quest double
       if(quest.type==='double' && quest.targetId===h.id) base *= 2;
       sum += base; doneCount++;
     }
     if(log[h.id]===false) sum -= h.penalty;
   }
-  // bonus por quest deadline
   if(quest.type==='deadline'){
     const now = new Date();
     const [hh,mm] = quest.deadline.split(':').map(x=>parseInt(x,10));
@@ -134,8 +129,7 @@ function xpSumWeek(weekId){
     }
     if(quest && quest.type==='deadline'){
       const limite = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 21, 0, 0);
-      // asumimos que si hubo 4+ hábitos hechos ese día, se logró (no tenemos hora exacta por ahora)
-      if(doneCount>=4) day += 20;
+      if(doneCount>=4) day += 20; // sin hora exacta histórica, asumimos logrado si hubo 4+
     }
     sum += Math.max(0,day);
   }
@@ -179,7 +173,6 @@ function statsToday(){
       if(h.attr==='sabiduria') sabiduria += h.xp;
       if(h.attr==='vitalidad') vitalidad += h.xp;
     }else if(log[h.id]===false){
-      // penal restando un tercio de la penal al atributo (suave)
       const p = Math.round(h.penalty/3);
       if(h.attr==='energia') energia -= p;
       if(h.attr==='conocimiento') conocimiento -= p;
@@ -187,7 +180,6 @@ function statsToday(){
       if(h.attr==='vitalidad') vitalidad -= p;
     }
   }
-  // Normalización a 0-100 sobre una meta razonable (suma de XP posibles del día)
   const maxDia = cfg.habitos.reduce((a,b)=>a+(b.xp),0);
   const clampPct = v => Math.max(0, Math.min(100, Math.round(v*100/Math.max(1,maxDia))));
   return {
@@ -198,7 +190,7 @@ function statsToday(){
   };
 }
 
-// ---- Clase del personaje (14 días)
+// ---- Clase del personaje (últimos 14 días)
 function classFromLast14d(){
   const sums = {energia:0, conocimiento:0, sabiduria:0, vitalidad:0};
   for(let i=0;i<14;i++){
@@ -267,7 +259,6 @@ function renderHeader(){
     bar.style.background = 'var(--btn)';
   }
 
-  // clase del personaje
   const cl = classFromLast14d();
   const ct = $('#classTitle'); if(ct) ct.textContent = `Clase: ${cl}`;
 
@@ -406,7 +397,6 @@ function wireIntro(){
   if(!seen && intro){ intro.hidden = false; }
   else if(intro){ intro.hidden = true; }
 
-  // avatar preview existente
   const data = localStorage.getItem(K.avatar);
   const prev = $('#introAvatarPreview');
   if(data && prev){
@@ -495,7 +485,7 @@ function cierreDelDiaHTML(){
   return `<p class="tiny">${frases.join(' ')}</p>`;
 }
 
-// ---- Init (todo el wiring va aquí)
+// ---- Init
 document.addEventListener('DOMContentLoaded',()=>{
   const on = (id, evt, fn) => {
     const el = document.getElementById(id);
@@ -557,7 +547,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     const xp=parseInt(xpEl?.value||'0',10);
     const pen=parseInt(penEl?.value||'0',10);
     if(!name || xp<=0) return;
-    // atributo por defecto: conocimiento (puedes cambiarlo luego en la tabla)
     cfg.habitos.push({id:'h'+Date.now(), label:name, xp:xp, penalty:pen, attr:'conocimiento'});
     saveCfg(); if(nameEl) nameEl.value=''; if(xpEl) xpEl.value=''; if(penEl) penEl.value='';
     renderCfgTable(); renderHabitos(); renderHeader();
