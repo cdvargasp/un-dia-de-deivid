@@ -105,6 +105,7 @@ const $ = s => document.querySelector(s);
 function renderAvatar(){
   const el = $('#avatarCircle');
   const data = localStorage.getItem(K.avatar);
+  if(!el) return;
   if(data){
     el.style.backgroundImage = `url(${data})`;
     el.style.backgroundSize = 'cover';
@@ -117,23 +118,30 @@ function renderAvatar(){
 }
 
 function renderHeader(){
-  $('#todayLabel').textContent = new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
-  $('#vidas').textContent = vidas;
-  $('#nivel').textContent = calcNivel();
-  $('#xpHoy').textContent = todayXP();
+  const d = $('#todayLabel');
+  if(d){
+    d.textContent = new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
+  }
+  $('#vidas') && ($('#vidas').textContent = vidas);
+  $('#nivel') && ($('#nivel').textContent = calcNivel());
+  $('#xpHoy') && ($('#xpHoy').textContent = todayXP());
   const w = xpWeekNow();
-  $('#xpSemana').textContent = w;
-  $('#metaText').textContent = `${w} / ${cfg.metaSemanal}`;
+  $('#xpSemana') && ($('#xpSemana').textContent = w);
+  $('#metaText') && ($('#metaText').textContent = `${w} / ${cfg.metaSemanal}`);
 
   const pct = Math.min(100, Math.round(w*100/cfg.metaSemanal));
   const bar = $('#barSemana');
-  bar.style.width = pct + '%';
-  bar.style.background = 'var(--btn)';
+  if(bar){
+    bar.style.width = pct + '%';
+    bar.style.background = 'var(--btn)';
+  }
   renderRewards(w);
 }
 
 function renderHabitos(){
-  const cont = $('#habitosList'); cont.innerHTML='';
+  const cont = $('#habitosList'); 
+  if(!cont) return;
+  cont.innerHTML='';
   const log = getLog(ymd(today));
   cfg.habitos.forEach(h=>{
     const row = document.createElement('div'); row.className='habit'+(log[h.id]===true?' done':'');
@@ -153,7 +161,8 @@ function renderHabitos(){
 }
 
 function renderRewards(total){
-  const list = $('#rewardsList'); list.innerHTML='';
+  const list = $('#rewardsList'); if(!list) return;
+  list.innerHTML='';
   const items = [
     {label:'Comida libre (1 evento)', need: cfg.umbralComida},
     {label:'Cervezas / salida', need: cfg.umbralCerveza}
@@ -165,24 +174,26 @@ function renderRewards(total){
     list.appendChild(li);
   });
   const faltan = Math.max(0, cfg.umbralComida - total);
-
-  // 🔹 Frase actualizada aquí
-  $('#recompensaHint').textContent = faltan>0 
-    ? `Te faltan al menos ${faltan} XP para alcanzar una recompensa.` 
-    : `¡Recompensas desbloqueadas!`;
+  const hint = $('#recompensaHint');
+  if(hint){
+    hint.textContent = faltan>0 
+      ? `Te faltan al menos ${faltan} XP para alcanzar una recompensa.` 
+      : `¡Recompensas desbloqueadas!`;
+  }
 }
 
 // ---- Config UI
-function openConfig(open=true){ $('#panelConfig').hidden = !open; if(open) fillConfig(); }
+function openConfig(open=true){ const p=$('#panelConfig'); if(p) p.hidden = !open; if(open) fillConfig(); }
 function fillConfig(){
-  $('#metaSemanal').value = cfg.metaSemanal;
-  $('#umbralComida').value = cfg.umbralComida;
-  $('#umbralCerveza').value = cfg.umbralCerveza;
-  $('#vidasInput').value = vidas;
+  $('#metaSemanal') && ($('#metaSemanal').value = cfg.metaSemanal);
+  $('#umbralComida') && ($('#umbralComida').value = cfg.umbralComida);
+  $('#umbralCerveza') && ($('#umbralCerveza').value = cfg.umbralCerveza);
+  $('#vidasInput') && ($('#vidasInput').value = vidas);
   renderCfgTable();
 }
 function renderCfgTable(){
-  const t = $('#tblHabitos'); t.innerHTML = `<tr><th>Hábito</th><th>XP</th><th>Penal</th><th></th></tr>`;
+  const t = $('#tblHabitos'); if(!t) return;
+  t.innerHTML = `<tr><th>Hábito</th><th>XP</th><th>Penal</th><th></th></tr>`;
   cfg.habitos.forEach((h,i)=>{
     const tr=document.createElement('tr');
     tr.innerHTML = `
@@ -257,46 +268,20 @@ function wireIntro(){
   }
 }
 
-// ---- Botones superiores
-document.getElementById('btnConfig').onclick = ()=> openConfig(true);
-document.getElementById('closeConfig').onclick = ()=> openConfig(false);
-document.getElementById('btnResetDia').onclick = ()=>{
-  localStorage.removeItem(K.log + ymd(today));
-  renderHeader(); renderHabitos();
-};
-document.getElementById('btnResumen').onclick = ()=>{
-  document.getElementById('resumenContent').innerHTML = weeklyReportHTML();
-  document.getElementById('panelResumen').hidden = false;
-};
-document.getElementById('closeResumen').onclick = ()=> document.getElementById('panelResumen').hidden = true;
-
-document.getElementById('metaSemanal').onchange = e=>{ cfg.metaSemanal=+e.target.value||500; saveCfg(); renderHeader(); };
-document.getElementById('umbralComida').onchange = e=>{ cfg.umbralComida=+e.target.value||300; saveCfg(); renderHeader(); };
-document.getElementById('umbralCerveza').onchange = e=>{ cfg.umbralCerveza=+e.target.value||500; saveCfg(); renderHeader(); };
-document.getElementById('vidasInput').onchange = e=>{
-  vidas = Math.max(0, Math.min(cfg.maxVidas, +e.target.value||vidas));
-  localStorage.setItem(K.lives, String(vidas));
-  renderHeader();
-};
-document.getElementById('addHab').onclick = ()=>{
-  const name=document.getElementById('newHabName').value.trim(); const xp=parseInt(document.getElementById('newHabXP').value||'0',10);
-  const pen=parseInt(document.getElementById('newHabPenalty').value||'0',10);
-  if(!name || xp<=0) return;
-  cfg.habitos.push({id:'h'+Date.now(), label:name, xp:xp, penalty:pen});
-  saveCfg(); document.getElementById('newHabName').value=''; document.getElementById('newHabXP').value=''; document.getElementById('newHabPenalty').value='';
-  renderCfgTable(); renderHabitos(); renderHeader();
-};
-
 // ---- Instalación PWA
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e)=>{
-  e.preventDefault(); deferredPrompt = e; const btn = document.getElementById('btnInstall'); btn.hidden=false;
-  btn.onclick = async ()=>{
-    btn.hidden = true;
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    deferredPrompt = null;
-  };
+  e.preventDefault(); deferredPrompt = e; 
+  const btn = document.getElementById('btnInstall'); 
+  if(btn){
+    btn.hidden=false;
+    btn.onclick = async ()=>{
+      btn.hidden = true;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+    };
+  }
 });
 
 // ---- Resumen semanal
@@ -320,12 +305,59 @@ function weeklyReportHTML(){
   return `<table class="table"><tr><th>Día</th><th>XP</th><th>Detalles</th></tr>${rows}<tr><td><b>Total</b></td><td><b>${total} XP</b></td><td>${unlocked}</td></tr></table>`;
 }
 
-// ---- Init
+// ---- Init (todo el wiring va aquí)
 document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('todayLabel').textContent =
-    new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
+  const on = (id, evt, fn) => {
+    const el = document.getElementById(id);
+    if(el) el.addEventListener(evt, fn);
+  };
+
+  const d = document.getElementById('todayLabel');
+  if(d){
+    d.textContent = new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
+  }
+
   renderAvatar();
   renderHeader();
   renderHabitos();
   wireIntro();
+
+  // Botones superiores y config
+  on('btnConfig','click', ()=> openConfig(true));
+  on('closeConfig','click', ()=> openConfig(false));
+  on('btnResetDia','click', ()=>{
+    localStorage.removeItem(K.log + ymd(today));
+    renderHeader(); renderHabitos();
+  });
+  on('btnResumen','click', ()=>{
+    const c = document.getElementById('resumenContent');
+    const p = document.getElementById('panelResumen');
+    if(c) c.innerHTML = weeklyReportHTML();
+    if(p) p.hidden = false;
+  });
+  on('closeResumen','click', ()=> {
+    const p = document.getElementById('panelResumen');
+    if(p) p.hidden = true;
+  });
+
+  on('metaSemanal','change', e=>{ cfg.metaSemanal=+e.target.value||500; saveCfg(); renderHeader(); });
+  on('umbralComida','change', e=>{ cfg.umbralComida=+e.target.value||300; saveCfg(); renderHeader(); });
+  on('umbralCerveza','change', e=>{ cfg.umbralCerveza=+e.target.value||500; saveCfg(); renderHeader(); });
+  on('vidasInput','change', e=>{
+    vidas = Math.max(0, Math.min(cfg.maxVidas, +e.target.value||vidas));
+    localStorage.setItem(K.lives, String(vidas));
+    renderHeader();
+  });
+  on('addHab','click', ()=>{
+    const nameEl=document.getElementById('newHabName');
+    const xpEl=document.getElementById('newHabXP');
+    const penEl=document.getElementById('newHabPenalty');
+    const name=nameEl?.value.trim();
+    const xp=parseInt(xpEl?.value||'0',10);
+    const pen=parseInt(penEl?.value||'0',10);
+    if(!name || xp<=0) return;
+    cfg.habitos.push({id:'h'+Date.now(), label:name, xp:xp, penalty:pen});
+    saveCfg(); if(nameEl) nameEl.value=''; if(xpEl) xpEl.value=''; if(penEl) penEl.value='';
+    renderCfgTable(); renderHabitos(); renderHeader();
+  });
 });
