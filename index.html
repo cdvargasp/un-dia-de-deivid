@@ -8,7 +8,7 @@
   <!-- Montserrat -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
 
-  <!-- PWA / Themecolor unificado -->
+  <!-- PWA / Themecolor -->
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#D9DBDF" />
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -27,9 +27,12 @@
     <!-- Estado -->
     <section class="card">
       <div class="row">
-        <div>
-          <div class="muted tiny">Hoy</div>
-          <div id="todayLabel" class="big"></div>
+        <div class="idwrap">
+          <div id="avatarCircle" class="avatar"><span>DV</span></div>
+          <div>
+            <div class="muted tiny">Hoy</div>
+            <div id="todayLabel" class="big"></div>
+          </div>
         </div>
         <div class="kpi">
           <div><div class="tiny muted">Nivel</div><div id="nivel" class="big">1</div></div>
@@ -91,6 +94,35 @@
       <h3>Resumen semanal</h3>
       <div id="resumenContent" class="tiny"></div>
       <div class="row end"><button id="closeResumen" class="btn">Cerrar</button></div>
+    </div>
+  </section>
+
+  <!-- Intro (primera vez) -->
+  <section id="panelIntro" class="sheet" hidden>
+    <div class="sheet-inner">
+      <h3>Bienvenido</h3>
+      <p class="tiny">
+        <b>UN DÍA DE DEIVID</b> es tu juego de hábitos. Marca tus logros diarios, suma XP y desbloquea recompensas semanales.
+        Tu objetivo: mantener constancia, subir de nivel y mejorar tus hábitos.
+      </p>
+
+      <div class="intro-grid">
+        <div>
+          <div id="introAvatarPreview" class="avatar bigavatar"><span>DV</span></div>
+        </div>
+        <div>
+          <label class="tiny">Tu avatar (opcional):</label>
+          <input id="introAvatarInput" type="file" accept="image/*">
+          <p class="tiny muted">Se guarda solo en este dispositivo.</p>
+          <label class="tiny row" style="gap:8px;margin-top:8px">
+            <input id="introNoShow" type="checkbox" checked> No volver a mostrar
+          </label>
+        </div>
+      </div>
+
+      <div class="row end" style="margin-top:12px">
+        <button id="introStart" class="btn">Empezar</button>
+      </div>
     </div>
   </section>
 
