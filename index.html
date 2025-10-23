@@ -51,7 +51,7 @@
       </div>
     </section>
 
-    <!-- Hábitos -->
+    <!-- Hábitos (ahora con acordeones y subhábitos) -->
     <section class="card">
       <div class="row">
         <h2>Hábitos de hoy</h2>
@@ -64,7 +64,7 @@
     <section class="card">
       <h2>Recompensas</h2>
       <ul id="rewardsList" class="bullets"></ul>
-      <p class="tiny muted">Domingo 23:59: si &lt;300 XP pierdes 1 vida; si ≥500 XP ganas 1 (máx 5).</p>
+      <p class="tiny muted">Semana válida: lunes–sábado. Domingo es comodín para recuperar **1 hábito**.</p>
     </section>
   </main>
 
@@ -72,10 +72,13 @@
   <section id="panelConfig" class="sheet" hidden>
     <div class="sheet-inner">
       <h3>Configuración</h3>
+
       <label>Meta semanal (XP) <input id="metaSemanal" type="number" min="100" step="10"></label>
       <label>Desbloqueo comida (XP) <input id="umbralComida" type="number" min="100" step="10"></label>
       <label>Desbloqueo cervezas (XP) <input id="umbralCerveza" type="number" min="100" step="10"></label>
+      <label>Presupuesto diario (finanzas) <input id="presupuestoDiario" type="number" min="0" step="1000"></label>
       <label>Vidas actuales (0–5) <input id="vidasInput" type="number" min="0" max="5"></label>
+
       <h4>Hábitos</h4>
       <table id="tblHabitos" class="table"></table>
       <div class="row">
@@ -103,7 +106,6 @@
       <h3>Bienvenido</h3>
       <p class="tiny">
         <b>UN DÍA DE DEIVID</b> es tu juego de hábitos. Marca tus logros diarios, suma XP y desbloquea recompensas semanales.
-        Tu objetivo: constancia, disciplina y mejora continua.
       </p>
 
       <div class="intro-grid">
@@ -130,4 +132,3 @@
   </script>
 </body>
 </html>
-
