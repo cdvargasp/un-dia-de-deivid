@@ -32,6 +32,7 @@
           <div>
             <div class="muted tiny">Hoy</div>
             <div id="todayLabel" class="big"></div>
+            <div class="tiny muted" id="classTitle">Clase: —</div>
           </div>
         </div>
         <div class="kpi">
@@ -44,11 +45,44 @@
       <div class="progress"><div id="barSemana" class="bar"></div></div>
       <div id="metaText" class="tiny muted">0 / 500</div>
       <div id="recompensaHint" class="hint tiny">Suma XP para desbloquear recompensas.</div>
+
+      <!-- Misión del día -->
+      <div class="quest">
+        <div class="quest-title">🎯 Misión del día</div>
+        <div id="questText" class="quest-text tiny"></div>
+        <div id="questStatus" class="quest-status tiny muted"></div>
+      </div>
+
       <div class="row gap">
         <button id="btnResumen" class="btn">Resumen</button>
         <button id="btnResetDia" class="btn">Reiniciar día</button>
+        <button id="btnCierre" class="btn">Cerrar día</button>
         <button id="btnConfig" class="btn">Configurar</button>
       </div>
+    </section>
+
+    <!-- Atributos del personaje -->
+    <section class="card">
+      <h2>Stats del personaje</h2>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">💪 Energía</div>
+          <div class="stat-bar"><div id="statEnergia" class="stat-fill"></div></div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">🧠 Conocimiento</div>
+          <div class="stat-bar"><div id="statConocimiento" class="stat-fill"></div></div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">💰 Sabiduría</div>
+          <div class="stat-bar"><div id="statSabiduria" class="stat-fill"></div></div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">🍎 Vitalidad</div>
+          <div class="stat-bar"><div id="statVitalidad" class="stat-fill"></div></div>
+        </div>
+      </div>
+      <p class="tiny muted" id="statsHint">Los hábitos de hoy alimentan tus atributos.</p>
     </section>
 
     <!-- Hábitos -->
@@ -94,6 +128,15 @@
       <h3>Resumen semanal</h3>
       <div id="resumenContent" class="tiny"></div>
       <div class="row end"><button id="closeResumen" class="btn">Cerrar</button></div>
+    </div>
+  </section>
+
+  <!-- Panel Cierre de día -->
+  <section id="panelCierre" class="sheet" hidden>
+    <div class="sheet-inner">
+      <h3>Cierre del día</h3>
+      <div id="cierreNarrativa" class="tiny"></div>
+      <div class="row end"><button id="closeCierre" class="btn">Listo</button></div>
     </div>
   </section>
 
