@@ -23,7 +23,7 @@ const K = {
   perfectWeeks:'uddd_perfect_weeks_v1'
 };
 
-// ========== Config por defecto (v2 con subhábitos) ==========
+// ========== Config por defecto (v2) ==========
 const defaultCfg = {
   metaSemanal:500,
   umbralComida:300,
@@ -56,8 +56,6 @@ function loadCfg(){
   let c;
   try{ c = JSON.parse(localStorage.getItem(K.cfg)||'null'); }catch{ c=null; }
   if(!c) return {...defaultCfg};
-
-  // Si no hay "type" asumimos que viene de v1 -> migramos a v2 usando defaultCfg, preservando umbrales
   const needsMigration = !Array.isArray(c.habitos) || c.habitos.some(h=>!h || !h.type);
   if(needsMigration){
     const out = {...defaultCfg};
@@ -65,7 +63,6 @@ function loadCfg(){
     out.umbralComida = typeof c.umbralComida==='number'? c.umbralComida : defaultCfg.umbralComida;
     out.umbralCerveza = typeof c.umbralCerveza==='number'? c.umbralCerveza : defaultCfg.umbralCerveza;
     out.presupuestoDia = typeof c.presupuestoDia==='number'? c.presupuestoDia : defaultCfg.presupuestoDia;
-    // si existía arreglo habitos, intentamos mapear xp/penalty/labels por id
     if(Array.isArray(c.habitos)){
       const byId = Object.fromEntries(defaultCfg.habitos.map(h=>[h.id,h]));
       c.habitos.forEach(old=>{
@@ -76,19 +73,17 @@ function loadCfg(){
       });
       out.habitos = Object.values(byId);
     }
-    // guardamos migrado
     localStorage.setItem(K.cfg, JSON.stringify(out));
     return out;
   }
   return c;
 }
-
 let cfg = loadCfg();
 let vidas = parseInt(localStorage.getItem(K.lives) || '3',10);
 const weekNow = isoWeekId(today);
 let perfectWeeks = parseInt(localStorage.getItem(K.perfectWeeks) || '0',10);
 
-// ========== Rollover semanal (vidas + semanas perfectas) ==========
+// ========== Rollover semanal ==========
 (function(){
   const prev = localStorage.getItem(K.lastWeek);
   if(prev && prev !== weekNow){
@@ -97,11 +92,8 @@ let perfectWeeks = parseInt(localStorage.getItem(K.perfectWeeks) || '0',10);
     if(lastXP < minReq) vidas = Math.max(0, vidas-1);
     else if(lastXP >= cfg.umbralCerveza) vidas = Math.min(cfg.maxVidas, vidas+1);
     localStorage.setItem(K.lives, String(vidas));
-
     const wasPerfect = semanaPerfecta(prev).perfect;
-    if(wasPerfect){
-      perfectWeeks++; localStorage.setItem(K.perfectWeeks, String(perfectWeeks));
-    }
+    if(wasPerfect){ perfectWeeks++; localStorage.setItem(K.perfectWeeks, String(perfectWeeks)); }
   }
   localStorage.setItem(K.lastWeek, weekNow);
 })();
@@ -124,65 +116,52 @@ function perSubPenalty(h){
   return Array.from({length:n}, (_,i)=> base + (i < resto ? 1 : 0));
 }
 
-// ========== Cálculo XP día/semanas ==========
+// ========== Cálculo XP ==========
 function todayXP(){
   const log = getLog(ymd(today));
   let sum=0;
   for(const h of cfg.habitos){
     const rec = log[h.id] || {};
-
     if(h.type==='checklist'){
-      const xs = perSubXP(h), ps = perSubPenalty(h);
+      const xs=perSubXP(h), ps=perSubPenalty(h);
       (h.subs||[]).forEach((s,idx)=>{
         const v = rec.subs ? rec.subs[s.id] : undefined;
-        if(v === true) sum += xs[idx];
-        if(v === false) sum -= ps[idx];
+        if(v===true) sum+=xs[idx];
+        if(v===false) sum-=ps[idx];
       });
-
     }else if(h.type==='finanzas'){
       const gasto = Number(rec.gasto);
       const presupuesto = Number(rec.presupuesto || cfg.presupuestoDia);
       const necesario = !!rec.necesario;
-      if(!isNaN(gasto)){
-        if(gasto <= presupuesto) sum += h.xp;
-        else sum += necesario ? 5 : -h.penalty;
-      }
-
+      if(!isNaN(gasto)){ sum += gasto<=presupuesto ? h.xp : (necesario?5:-h.penalty); }
     }else if(h.type==='sueno'){
-      if(rec.ok === true) sum += h.xp;
-      else if(rec.ok === false) sum -= h.penalty;
+      if(rec.ok===true) sum+=h.xp; else if(rec.ok===false) sum-=h.penalty;
     }
   }
   return Math.max(0,sum);
 }
-
 function xpSumWeek(weekId){
   let sum=0;
   for(let i=0;i<8;i++){
     const d=new Date(today); d.setDate(d.getDate()-i);
     if(isoWeekId(d)!==weekId) continue;
-    const log=getLog(ymd(d));
-    let day=0;
+    const log=getLog(ymd(d)); let day=0;
     for(const h of cfg.habitos){
       const rec = log[h.id] || {};
       if(h.type==='checklist'){
-        const xs = perSubXP(h), ps = perSubPenalty(h);
+        const xs=perSubXP(h), ps=perSubPenalty(h);
         (h.subs||[]).forEach((s,idx)=>{
           const v = rec.subs ? rec.subs[s.id] : undefined;
-          if(v === true) day += xs[idx];
-          if(v === false) day -= ps[idx];
+          if(v===true) day+=xs[idx];
+          if(v===false) day-=ps[idx];
         });
       }else if(h.type==='finanzas'){
         const gasto = Number(rec.gasto);
         const presupuesto = Number(rec.presupuesto || cfg.presupuestoDia);
         const necesario = !!rec.necesario;
-        if(!isNaN(gasto)){
-          if(gasto <= presupuesto) day += h.xp;
-          else day += necesario ? 5 : -h.penalty;
-        }
+        if(!isNaN(gasto)){ day += gasto<=presupuesto ? h.xp : (necesario?5:-h.penalty); }
       }else if(h.type==='sueno'){
-        if(rec.ok === true) day += h.xp;
-        else if(rec.ok === false) day -= h.penalty;
+        if(rec.ok===true) day+=h.xp; else if(rec.ok===false) day-=h.penalty;
       }
     }
     sum += Math.max(0,day);
@@ -191,7 +170,7 @@ function xpSumWeek(weekId){
 }
 const xpWeekNow = ()=> xpSumWeek(weekNow);
 
-// ========== Semana perfecta (lun–sab, domingo comodín) ==========
+// ========== Semana perfecta ==========
 function diaCompleto(h, rec){
   rec = rec || {};
   if(h.type==='checklist'){
@@ -214,29 +193,25 @@ function diaCompleto(h, rec){
   return false;
 }
 function semanaPerfecta(weekId){
-  // encontrar domingo de esa semana
   const ref = new Date(today);
   let guard=0;
   while(isoWeekId(ref)!==weekId && guard<60){ ref.setDate(ref.getDate()-1); guard++; }
-  const monday = new Date(ref); monday.setDate(ref.getDate() - DOW(ref)); // lunes
+  const monday = new Date(ref); monday.setDate(ref.getDate() - DOW(ref));
   const sunday = new Date(monday); sunday.setDate(monday.getDate()+6);
   const sundayLog = getLog(ymd(sunday));
 
   let perfect = true;
-  const failsByHabit = {};
-
   for(const h of cfg.habitos){
     let fallos = 0;
-    for(let i=0;i<6;i++){ // lun-sab
+    for(let i=0;i<6;i++){
       const d = new Date(monday); d.setDate(monday.getDate()+i);
       const log = getLog(ymd(d));
       if(!diaCompleto(h, log[h.id])) fallos++;
     }
     if(fallos>0 && diaCompleto(h, sundayLog[h.id])) fallos = Math.max(0, fallos-1);
-    failsByHabit[h.id] = fallos;
     if(fallos>0) perfect=false;
   }
-  return { perfect, failsByHabit };
+  return { perfect };
 }
 
 // ========== Nivel ==========
@@ -248,7 +223,7 @@ function calcNivel(){
 // ========== UI helpers ==========
 const $ = s => document.querySelector(s);
 
-// ========== Render header ==========
+// ========== Header ==========
 function renderAvatar(){
   const el = $('#avatarCircle'); if(!el) return;
   const data = localStorage.getItem(K.avatar);
@@ -264,7 +239,8 @@ function renderAvatar(){
 }
 function renderHeader(){
   try{
-    const tl = $('#todayLabel'); if(tl) tl.textContent = new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
+    $('#todayLabel') && ($('#todayLabel').textContent =
+      new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.',''));
     const w = xpWeekNow();
     const pct = Math.min(100, Math.round(w*100/Math.max(1,cfg.metaSemanal)));
     $('#vidas') && ($('#vidas').textContent = String(vidas));
@@ -277,15 +253,28 @@ function renderHeader(){
   }catch(e){ console.error('renderHeader', e); }
 }
 
+// ---- util: conservar acordeones abiertos y posición
+function getOpenIds(){
+  const cont = $('#habitosList');
+  if(!cont) return new Set();
+  return new Set(Array.from(cont.querySelectorAll('details[open]')).map(d=>d.dataset.id));
+}
+
 // ========== Render hábitos ==========
 function renderHabitos(){
   try{
     const cont = $('#habitosList'); if(!cont) return;
-    cont.innerHTML='';
+    const openIds = getOpenIds();          // guardar abiertos
+    const scrollY = window.scrollY;        // guardar scroll
     const log = getLog(ymd(today));
+
+    cont.innerHTML='';
 
     cfg.habitos.forEach(h=>{
       const details = document.createElement('details');
+      details.dataset.id = h.id;
+      details.open = openIds.has(h.id);    // restaurar abierto
+
       const summary = document.createElement('summary');
 
       // mini info
@@ -316,7 +305,9 @@ function renderHabitos(){
             const L = getLog(ymd(today));
             const obj = L[h.id] || (L[h.id]={subs:{}});
             if(cb.checked) obj.subs[s.id]=true; else delete obj.subs[s.id];
-            setLog(ymd(today),L); renderHeader(); renderHabitos();
+            setLog(ymd(today),L);
+            renderHeader();
+            renderHabitos(); // se mantendrán abiertos y la posición
           });
           const label = document.createElement('div'); label.textContent = s.label;
           const right = document.createElement('div'); right.className='right';
@@ -325,7 +316,9 @@ function renderHabitos(){
             const L = getLog(ymd(today));
             const obj = L[h.id] || (L[h.id]={subs:{}});
             obj.subs[s.id] = false;
-            setLog(ymd(today),L); renderHeader(); renderHabitos();
+            setLog(ymd(today),L);
+            renderHeader();
+            renderHabitos();
           });
           right.appendChild(fail);
           row.append(cb,label,right); sub.appendChild(row);
@@ -333,9 +326,7 @@ function renderHabitos(){
 
       }else if(h.type==='finanzas'){
         const rec = log[h.id] || {};
-        const inGasto = document.createElement('input');
-        inGasto.type='number'; inGasto.className='input';
-        inGasto.placeholder='0'; inGasto.value = rec.gasto||'';
+        const inGasto = document.createElement('input'); inGasto.type='number'; inGasto.className='input'; inGasto.placeholder='0'; inGasto.value = rec.gasto||'';
         const rowG = document.createElement('div'); rowG.className='subrow';
         rowG.append(document.createElement('div'), inGasto, document.createElement('div'));
 
@@ -343,8 +334,7 @@ function renderHabitos(){
         const rowN = document.createElement('div'); rowN.className='subrow';
         rowN.append(document.createElement('div'), document.createTextNode('¿Fue necesario?'), chkNec);
 
-        const txt = document.createElement('textarea'); txt.className='textarea';
-        txt.placeholder='Justificación si te pasaste del presupuesto...'; txt.value = rec.nota||'';
+        const txt = document.createElement('textarea'); txt.className='textarea'; txt.placeholder='Justificación si te pasaste del presupuesto...'; txt.value = rec.nota||'';
         const rowT = document.createElement('div'); rowT.className='subrow';
         rowT.append(document.createElement('div'), txt, document.createElement('div'));
 
@@ -371,8 +361,7 @@ function renderHabitos(){
         const label = document.createElement('div'); label.textContent = 'Dormí ≥7 horas';
         row.append(cb,label,document.createElement('div'));
 
-        const txt = document.createElement('textarea'); txt.className='textarea';
-        txt.placeholder='Si NO dormiste ≥7h, explica brevemente por qué.'; txt.value = rec.nota||'';
+        const txt = document.createElement('textarea'); txt.className='textarea'; txt.placeholder='Si NO dormiste ≥7h, explica brevemente por qué.'; txt.value = rec.nota||'';
         const rowT = document.createElement('div'); rowT.className='subrow';
         rowT.append(document.createElement('div'), txt, document.createElement('div'));
         const save = document.createElement('button'); save.className='btn'; save.textContent='Guardar';
@@ -390,10 +379,11 @@ function renderHabitos(){
       }
 
       details.appendChild(sub);
-      // abrir por defecto (opcional: comenta la siguiente línea si no lo quieres abierto)
-      // details.open = true;
-      $('#habitosList').appendChild(details);
+      cont.appendChild(details);
     });
+
+    // restaurar scroll
+    window.scrollTo(0, scrollY);
   }catch(e){
     console.error('renderHabitos', e);
   }
@@ -406,14 +396,12 @@ function renderRewards(total){
     list.innerHTML='';
     let perfect=false;
     try{ perfect = semanaPerfecta(weekNow).perfect; }catch{}
-
-    const tiers = [
+    [
       {name:'🍻 Salida con amigos (mayor)', need:cfg.metaSemanal, cond: perfect},
       {name:'🛍️ Compra pequeña', need:400, cond: total>=400},
       {name:'🍽️ Cena libre', need:300, cond: total>=300},
       {name:'🍦 Helado / snack', need:200, cond: total>=200}
-    ];
-    tiers.forEach(t=>{
+    ].forEach(t=>{
       const li=document.createElement('li');
       li.textContent = (t.cond?'✅ ':'⏳ ') + `${t.name} — referencia ${t.need} XP`;
       list.appendChild(li);
@@ -429,7 +417,12 @@ function renderRewards(total){
 }
 
 // ========== Config ==========
-function openConfig(open=true){ const p=$('#panelConfig'); if(p){ p.hidden = !open; if(open) fillConfig(); } }
+function openConfig(open=true){
+  const p=$('#panelConfig'); if(!p) return;
+  p.hidden = !open;
+  if(open){ fillConfig(); document.body.style.overflow='hidden'; }
+  else { document.body.style.overflow=''; }
+}
 function fillConfig(){
   const setVal = (sel,val)=>{ const el=$(sel); if(el) el.value = val; };
   setVal('#metaSemanal', cfg.metaSemanal);
@@ -475,7 +468,6 @@ function wireIntro(){
   const remember = $('#rememberMe');
   const seen = localStorage.getItem(K.introSeen) === '1';
   if(intro){ intro.hidden = !!seen; }
-
   const data = localStorage.getItem(K.avatar);
   const prev = $('#introAvatarPreview');
   if(data && prev){
@@ -484,7 +476,6 @@ function wireIntro(){
     prev.style.backgroundPosition = 'center';
     prev.innerHTML = '';
   }
-
   const inp = $('#avatarInput');
   if(inp){
     inp.onchange = e=>{
@@ -556,7 +547,6 @@ function weeklyReportHTML(){
   const base = new Date(today);
   const monday = new Date(base); monday.setDate(base.getDate()-DOW(base));
   const rows=[]; let total=0; const notes=[];
-
   for(let i=0;i<7;i++){
     const d=new Date(monday); d.setDate(monday.getDate()+i);
     const id=ymd(d); const log=getLog(id);
@@ -586,7 +576,6 @@ function weeklyReportHTML(){
     rows.push(`<tr><td>${d.toLocaleDateString('es-CO',{weekday:'short',day:'2-digit'})}</td><td>${Math.max(0,xp)} XP</td><td class="muted tiny">${tags.join(' · ')||'—'}</td></tr>`);
     total += Math.max(0,xp);
   }
-
   const perfect = (function(){ try{return semanaPerfecta(weekNow).perfect;}catch{return false;} })();
   const unlocked = `${perfect?'✅ Semana perfecta':'⏳ Aún no'} · ${total>=cfg.metaSemanal?'✅ Meta':'⏳ Meta'} (${total} / ${cfg.metaSemanal})`;
   const notesHtml = notes.length? `<p class="tiny"><b>Notas:</b><br>${notes.map(n=>`• ${n}`).join('<br>')}</p>`: '';
@@ -596,7 +585,8 @@ function weeklyReportHTML(){
 // ========== Init ==========
 document.addEventListener('DOMContentLoaded',()=>{
   try{
-    $('#todayLabel') && ($('#todayLabel').textContent = new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.',''));
+    $('#todayLabel') && ($('#todayLabel').textContent =
+      new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.',''));
     renderAvatar();
     renderHeader();
     renderHabitos();
