@@ -11,25 +11,26 @@ function isoWeekId(d){
   return `${_d.getUTCFullYear()}-W${String(week).padStart(2,'0')}`;
 }
 const DOW = d => (d.getDay()+6)%7; // 0=lunes ... 6=domingo
+const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
 
 // ---- Claves
 const K = {
-  cfg:'uddd_cfg_v2',                // <— versión nueva de config (subhábitos)
+  cfg:'uddd_cfg_v2',
   lives:'uddd_lives_v1',
   lastWeek:'uddd_last_week_v1',
-  log:'uddd_log_',                  // + ymd
+  log:'uddd_log_',
   introSeen:'uddd_intro_seen_v1',
   avatar:'uddd_avatar_dataurl_v1',
   perfectWeeks:'uddd_perfect_weeks_v1'
 };
 
-// ---- Config por defecto (con subhábitos y presupuesto)
+// ---- Config por defecto
 const defaultCfg = {
   metaSemanal:500,
   umbralComida:300,
   umbralCerveza:500,
   maxVidas:5,
-  presupuestoDia:30000, // COP (editable)
+  presupuestoDia:30000,
   habitos:[
     {id:'comer', label:'Comer bien todo el día', xp:30, penalty:20,
       type:'checklist',
@@ -60,8 +61,7 @@ const defaultCfg = {
         {id:'escritura', label:'Escritura'},
         {id:'practica', label:'Proyecto/Práctica'}
       ]},
-    {id:'finanzas', label:'Control de finanzas (10 min)', xp:20, penalty:15,
-      type:'finanzas'}, // presupuesto, necesario, nota
+    {id:'finanzas', label:'Control de finanzas (10 min)', xp:20, penalty:15, type:'finanzas'},
     {id:'ejercicio', label:'Ejercicio (cardio/fuerza/movilidad)', xp:15, penalty:10,
       type:'checklist',
       subs:[
@@ -69,8 +69,7 @@ const defaultCfg = {
         {id:'fuerza', label:'Fuerza'},
         {id:'movilidad', label:'Movilidad/estiramientos'}
       ]},
-    {id:'sueno', label:'Dormir ≥7h', xp:15, penalty:10,
-      type:'sueno'} // ok + nota si falla
+    {id:'sueno', label:'Dormir ≥7h', xp:15, penalty:10, type:'sueno'}
   ]
 };
 
@@ -80,7 +79,7 @@ let vidas = parseInt(localStorage.getItem(K.lives) || '3',10);
 const weekNow = isoWeekId(today);
 let perfectWeeks = parseInt(localStorage.getItem(K.perfectWeeks) || '0',10);
 
-// ---- Rollover semanal (vidas)
+// ---- Rollover semanal (vidas + semanas perfectas)
 (function(){
   const prev = localStorage.getItem(K.lastWeek);
   if(prev && prev !== weekNow){
@@ -90,27 +89,27 @@ let perfectWeeks = parseInt(localStorage.getItem(K.perfectWeeks) || '0',10);
     else if(lastXP >= cfg.umbralCerveza) vidas = Math.min(cfg.maxVidas, vidas+1);
     localStorage.setItem(K.lives, String(vidas));
 
-    // Semana perfecta -> contador
     const wasPerfect = semanaPerfecta(prev).perfect;
-    if(wasPerfect){ perfectWeeks++; localStorage.setItem(K.perfectWeeks, String(perfectWeeks)); }
+    if(wasPerfect){
+      perfectWeeks++; localStorage.setItem(K.perfectWeeks, String(perfectWeeks));
+    }
   }
   localStorage.setItem(K.lastWeek, weekNow);
 })();
 
 // ---- Logs
-function getLog(d){ return JSON.parse(localStorage.getItem(K.log + d) || '{}'); }
-function setLog(d,obj){ localStorage.setItem(K.log + d, JSON.stringify(obj)); }
+const getLog = d => JSON.parse(localStorage.getItem(K.log + d) || '{}');
+const setLog = (d,obj) => localStorage.setItem(K.log + d, JSON.stringify(obj||{}));
 
-// ---- Helpers de XP proporcional (checklists)
+// ---- Helpers XP
 function perSubXP(h){
-  const n = (h.subs?.length || 1);
+  const n = Math.max(1, h.subs?.length || 0);
   const base = Math.floor(h.xp / n);
   const resto = h.xp - base*n;
-  // devolvemos array de valores por sub para sumar exacto (distribuye resto)
   return Array.from({length:n}, (_,i)=> base + (i < resto ? 1 : 0));
 }
 function perSubPenalty(h){
-  const n = (h.subs?.length || 1);
+  const n = Math.max(1, h.subs?.length || 0);
   const base = Math.floor(h.penalty / n);
   const resto = h.penalty - base*n;
   return Array.from({length:n}, (_,i)=> base + (i < resto ? 1 : 0));
@@ -137,8 +136,8 @@ function todayXP(){
       const presupuesto = Number(rec?.presupuesto ?? cfg.presupuestoDia);
       const necesario = !!rec?.necesario;
       if(!isNaN(gasto)){
-        if(gasto <= presupuesto) sum += h.xp;            // perfecto
-        else sum += necesario ? 5 : -h.penalty;          // necesario=+5, si no, penal completo
+        if(gasto <= presupuesto) sum += h.xp;
+        else sum += necesario ? 5 : -h.penalty;
       }
 
     }else if(h.type==='sueno'){
@@ -150,10 +149,9 @@ function todayXP(){
   return Math.max(0,sum);
 }
 
-// ---- Suma XP por semana (considerando domingo comodín en perfección, no en XP)
+// ---- Suma XP por semana
 function xpSumWeek(weekId){
   let sum=0;
-  // recorremos 8 días hacia atrás por seguridad
   for(let i=0;i<8;i++){
     const d=new Date(today); d.setDate(d.getDate()-i);
     if(isoWeekId(d)!==weekId) continue;
@@ -161,6 +159,7 @@ function xpSumWeek(weekId){
     let day=0;
     for(const h of cfg.habitos){
       const rec = log[h.id];
+
       if(h.type==='checklist'){
         const xs = perSubXP(h);
         const ps = perSubPenalty(h);
@@ -187,62 +186,55 @@ function xpSumWeek(weekId){
   }
   return Math.max(0,sum);
 }
+const xpWeekNow = ()=> xpSumWeek(weekNow);
 
-// ---- Semana perfecta / completitud con domingo comodín
+// ---- Semanas perfectas (lunes–sábado, domingo comodín)
 function diaCompleto(h, rec){
   if(h.type==='checklist'){
-    const total = h.subs?.length || 0;
-    if(!total) return false;
     const done = Object.values(rec?.subs||{}).filter(v=>v===true).length;
-    // criterios por hábito:
     if(h.id==='comer') return done >= 5;
     if(h.id==='ingles') return done >= 3;
     if(h.id==='trabajo') return (rec?.subs?.am === true && rec?.subs?.pm === true);
     if(h.id==='estudio') return done >= 3;
     if(h.id==='ejercicio') return done >= 3;
-    return done === total;
+    return false;
   }else if(h.type==='finanzas'){
     const gasto = Number(rec?.gasto ?? NaN);
     const presupuesto = Number(rec?.presupuesto ?? cfg.presupuestoDia);
     if(isNaN(gasto)) return false;
     if(gasto <= presupuesto) return true;
-    return !!rec?.necesario; // si fue necesario y justificado lo contamos como completo
+    return !!rec?.necesario;
   }else if(h.type==='sueno'){
     return rec?.ok === true;
   }
   return false;
 }
 function semanaPerfecta(weekId){
-  // Semana válida: lun(0)–sab(5), domingo(6) como comodín
-  // Recorremos cada hábito y validamos 6 días; si hay un único fallo, ver si domingo cubre ese hábito.
+  // Localiza el domingo de esa semana
+  const ref = new Date(today);
+  while(isoWeekId(ref)!==weekId){ ref.setDate(ref.getDate()-1); }
+  const monday = new Date(ref); monday.setDate(ref.getDate() - DOW(ref)); // lunes
+  const sunday = new Date(monday); sunday.setDate(monday.getDate()+6);
+  const sundayLog = getLog(ymd(sunday));
+
   let perfect = true;
   const failsByHabit = {};
-  const sunday = new Date(today);
-  while(isoWeekId(sunday)!==weekId) sunday.setDate(sunday.getDate()-1);
-  // obtener lunes base de esa semana:
-  const base = new Date(sunday); base.setDate(sunday.getDate() - DOW(sunday)); // lunes
-  const sundayLog = getLog(ymd(new Date(base.getFullYear(),base.getMonth(),base.getDate()+6)));
 
   for(const h of cfg.habitos){
     let fallos = 0;
     for(let i=0;i<6;i++){ // lun-sab
-      const d = new Date(base); d.setDate(base.getDate()+i);
+      const d = new Date(monday); d.setDate(monday.getDate()+i);
       const log = getLog(ymd(d));
-      const ok = diaCompleto(h, log[h.id]);
-      if(!ok) fallos++;
+      if(!diaCompleto(h, log[h.id])) fallos++;
     }
-    // ¿domingo cubre uno?
-    if(fallos>0){
-      const cover = diaCompleto(h, sundayLog[h.id]);
-      if(cover) fallos = Math.max(0, fallos-1);
-    }
+    if(fallos>0 && diaCompleto(h, sundayLog[h.id])) fallos = Math.max(0, fallos-1);
     failsByHabit[h.id] = fallos;
     if(fallos>0) perfect=false;
   }
   return { perfect, failsByHabit };
 }
 
-// ---- Nivel basado en semanas perfectas
+// ---- Nivel por semanas perfectas
 function calcNivel(){
   const w = perfectWeeks;
   if(w>=26) return 5; if(w>=16) return 4; if(w>=8) return 3; if(w>=4) return 2; return 1;
@@ -251,7 +243,7 @@ function calcNivel(){
 // ---- UI helpers
 const $ = s => document.querySelector(s);
 
-// ---- Render header/KPIs
+// ---- Header
 function renderAvatar(){
   const el = $('#avatarCircle'); if(!el) return;
   const data = localStorage.getItem(K.avatar);
@@ -266,7 +258,7 @@ function renderAvatar(){
   }
 }
 function renderHeader(){
-  const tl = $('#todayLabel'); if(tl) tl.textContent =
+  $('#todayLabel')?.textContent =
     new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
   $('#vidas')?.textContent = vidas;
   $('#nivel')?.textContent = calcNivel();
@@ -281,9 +273,8 @@ function renderHeader(){
 
   renderRewards(w);
 }
-function xpWeekNow(){ return xpSumWeek(weekNow); }
 
-// ---- Render hábitos con subhábitos
+// ---- Hábitos con subhábitos
 function renderHabitos(){
   const cont = $('#habitosList'); if(!cont) return;
   cont.innerHTML='';
@@ -296,7 +287,7 @@ function renderHabitos(){
     // Mini progreso
     let mini = '';
     if(h.type==='checklist'){
-      const total = h.subs.length;
+      const total = h.subs?.length || 0;
       const done = Object.values(log[h.id]?.subs||{}).filter(v=>v===true).length;
       mini = `<span class="small muted">${done}/${total}</span>`;
     }else if(h.type==='sueno'){
@@ -313,7 +304,7 @@ function renderHabitos(){
     const sub = document.createElement('div'); sub.className='sublist';
 
     if(h.type==='checklist'){
-      h.subs.forEach((s, idx)=>{
+      (h.subs||[]).forEach((s, idx)=>{
         const row = document.createElement('div'); row.className='subrow';
         const cb = document.createElement('input'); cb.type='checkbox';
         cb.checked = log[h.id]?.subs?.[s.id] === true;
@@ -338,18 +329,17 @@ function renderHabitos(){
 
     }else if(h.type==='finanzas'){
       const rec = log[h.id] || {};
-      const row1 = document.createElement('div'); row1.className='subrow';
-      row1.innerHTML = `<div></div><div>Gasto del día</div><div class="right"></div>`;
       const inGasto = document.createElement('input'); inGasto.type='number'; inGasto.className='input'; inGasto.placeholder='0'; inGasto.value = rec.gasto||'';
-      const rowG = document.createElement('div'); rowG.className='subrow'; rowG.append(document.createElement('div'), inGasto, document.createElement('div'));
+      const rowG = document.createElement('div'); rowG.className='subrow';
+      rowG.append(document.createElement('div'), inGasto, document.createElement('div'));
 
-      const row2 = document.createElement('div'); row2.className='subrow';
-      row2.innerHTML = `<div></div><div>¿Fue necesario?</div><div class="right"></div>`;
       const chkNec = document.createElement('input'); chkNec.type='checkbox'; chkNec.checked = !!rec.necesario;
-      const rowN = document.createElement('div'); rowN.className='subrow'; rowN.append(document.createElement('div'), document.createTextNode('Marcar si el gasto era necesario'), chkNec);
+      const rowN = document.createElement('div'); rowN.className='subrow';
+      rowN.append(document.createElement('div'), document.createTextNode('¿Fue necesario?'), chkNec);
 
       const txt = document.createElement('textarea'); txt.className='textarea'; txt.placeholder='Justificación si te pasaste del presupuesto...'; txt.value = rec.nota||'';
-      const rowT = document.createElement('div'); rowT.className='subrow'; rowT.append(document.createElement('div'), txt, document.createElement('div'));
+      const rowT = document.createElement('div'); rowT.className='subrow';
+      rowT.append(document.createElement('div'), txt, document.createElement('div'));
 
       const save = document.createElement('button'); save.className='btn'; save.textContent='Guardar finanzas';
       save.onclick = ()=>{
@@ -362,22 +352,24 @@ function renderHabitos(){
         };
         setLog(ymd(today),L); renderHeader(); renderHabitos();
       };
-      const rowS = document.createElement('div'); rowS.className='subrow'; rowS.append(document.createElement('div'), document.createTextNode(''), save);
+      const rowS = document.createElement('div'); rowS.className='subrow';
+      rowS.append(document.createElement('div'), document.createTextNode(''), save);
 
-      sub.append(row1,rowG,row2,rowN,rowT,rowS);
+      sub.append(rowG,rowN,rowT,rowS);
 
     }else if(h.type==='sueno'){
       const rec = log[h.id]||{};
       const row = document.createElement('div'); row.className='subrow';
       const cb = document.createElement('input'); cb.type='checkbox'; cb.checked = rec.ok===true;
       const label = document.createElement('div'); label.textContent = 'Dormí ≥7 horas';
-      const right = document.createElement('div'); right.className='right';
-      row.append(cb,label,right);
+      row.append(cb,label,document.createElement('div'));
 
       const txt = document.createElement('textarea'); txt.className='textarea'; txt.placeholder='Si NO dormiste ≥7h, explica brevemente por qué.'; txt.value = rec.nota||'';
-      const rowT = document.createElement('div'); rowT.className='subrow'; rowT.append(document.createElement('div'), txt, document.createElement('div'));
+      const rowT = document.createElement('div'); rowT.className='subrow';
+      rowT.append(document.createElement('div'), txt, document.createElement('div'));
       const save = document.createElement('button'); save.className='btn'; save.textContent='Guardar';
-      const rowS = document.createElement('div'); rowS.className='subrow'; rowS.append(document.createElement('div'), document.createTextNode(''), save);
+      const rowS = document.createElement('div'); rowS.className='subrow';
+      rowS.append(document.createElement('div'), document.createTextNode(''), save);
 
       function persist(){
         const L = getLog(ymd(today));
@@ -399,7 +391,6 @@ function renderRewards(total){
   const list = $('#rewardsList'); if(!list) return;
   list.innerHTML='';
 
-  // Tiers por XP o % de completitud (se calcula con semanaPerfecta/XP)
   const {perfect} = semanaPerfecta(weekNow);
   const xp = total;
 
@@ -461,7 +452,7 @@ function renderCfgTable(){
     });
   });
 }
-function saveCfg(){ localStorage.setItem(K.cfg, JSON.stringify(cfg)); }
+const saveCfg = ()=> localStorage.setItem(K.cfg, JSON.stringify(cfg));
 
 // ---- Intro + avatar
 function wireIntro(){
@@ -531,7 +522,7 @@ document.getElementById('umbralComida')?.addEventListener('change', e=>{ cfg.umb
 document.getElementById('umbralCerveza')?.addEventListener('change', e=>{ cfg.umbralCerveza=+e.target.value||500; saveCfg(); renderHeader(); });
 document.getElementById('presupuestoDiario')?.addEventListener('change', e=>{ cfg.presupuestoDia=+e.target.value||cfg.presupuestoDia; saveCfg(); });
 document.getElementById('vidasInput')?.addEventListener('change', e=>{
-  vidas = Math.max(0, Math.min(cfg.maxVidas, +e.target.value||vidas));
+  vidas = clamp(+e.target.value||vidas, 0, cfg.maxVidas);
   localStorage.setItem(K.lives, String(vidas));
   renderHeader();
 });
@@ -546,10 +537,9 @@ document.getElementById('addHab')?.addEventListener('click', ()=>{
   renderCfgTable(); renderHabitos(); renderHeader();
 });
 
-// ---- Resumen semanal (incluye domingo comodín y notas)
+// ---- Resumen semanal
 function weeklyReportHTML(){
   const base = new Date(today);
-  // mover base a su lunes
   const dow = DOW(base);
   const monday = new Date(base); monday.setDate(base.getDate()-dow);
 
@@ -590,17 +580,19 @@ function weeklyReportHTML(){
 
   const {perfect} = semanaPerfecta(weekNow);
   const unlocked = `${perfect?'✅ Semana perfecta':'⏳ Aún no'} · ${total>=cfg.metaSemanal?'✅ Meta':'⏳ Meta'} (${total} / ${cfg.metaSemanal})`;
-
   const notesHtml = notes.length? `<p class="tiny"><b>Notas:</b><br>${notes.map(n=>`• ${n}`).join('<br>')}</p>`: '';
-
   return `<table class="table"><tr><th>Día</th><th>XP</th><th>Detalles</th></tr>${rows.join('')}<tr><td><b>Total</b></td><td><b>${total} XP</b></td><td>${unlocked}</td></tr></table>${notesHtml}`;
 }
 
 // ---- Init
 document.addEventListener('DOMContentLoaded',()=>{
-  $('#todayLabel')?.textContent = new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
-  renderAvatar();
-  renderHeader();
-  renderHabitos();
-  wireIntro();
+  try{
+    $('#todayLabel')?.textContent = new Date().toLocaleDateString('es-CO',{weekday:'long', day:'2-digit', month:'short'}).replace('.','');
+    renderAvatar();
+    renderHeader();
+    renderHabitos();
+    wireIntro();
+  }catch(err){
+    console.error('Init error:', err);
+  }
 });
