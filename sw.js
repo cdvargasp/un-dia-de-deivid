@@ -1,4 +1,4 @@
-const CACHE = 'uddd-luxury-theme-v5'; // sube versión para forzar recarga
+const CACHE = 'uddd-luxury-theme-v6'; // sube versión para forzar recarga
 const ASSETS = [
   './','./index.html','./styles.css','./app.js',
   './manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'
