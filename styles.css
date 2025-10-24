@@ -1,14 +1,13 @@
 :root{
-  /* Paleta (de tu imagen) */
-  --bg:#EEE9DF;            /* fondo general */
-  --card:#1B2632;          /* tarjetas grandes + modales + topbar */
-  --habit-card:#2C3B4D;    /* cuadros de hábitos */
-  --btn:#FFB162;           /* botones y barra */
-  --btn-border:#A35139;    /* borde botón */
-  --accent:#A35139;        /* detalles/acento */
-  --text-dark:#1B2632;     /* texto oscuro */
-  --text-light:#FFFFFF;    /* texto claro */
-  --muted:#C9C1B1;         /* texto secundario */
+  --bg:#EEE9DF;
+  --card:#1B2632;
+  --habit-card:#2C3B4D;
+  --btn:#FFB162;
+  --btn-border:#A35139;
+  --accent:#A35139;
+  --text-dark:#1B2632;
+  --text-light:#FFFFFF;
+  --muted:#C9C1B1;
 }
 
 *{box-sizing:border-box}
@@ -20,7 +19,7 @@ body{
   -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
 }
 
-/* Topbar centrado */
+/* Topbar */
 .topbar{
   position:sticky; top:0; z-index:10;
   background:var(--card);
@@ -38,7 +37,7 @@ body{
 
 .wrap{max-width:980px;margin:auto;padding:16px;display:grid;gap:16px}
 
-/* Tarjetas principales */
+/* Cards */
 .card{
   background:var(--card);
   color:var(--text-light);
@@ -62,7 +61,7 @@ body{
 .avatar span{color:var(--text-light);font-weight:700}
 .bigavatar{width:84px;height:84px}
 
-/* Botones */
+/* Buttons */
 .btn{
   background:var(--btn); color:var(--text-dark);
   border:1px solid var(--btn-border);
@@ -72,11 +71,10 @@ body{
 .btn:hover{filter:brightness(1.05)}
 .btn:active{transform:scale(.98)}
 
-/* Progreso (amarillo) */
 .progress{height:10px;background:#DCCFBB;border-radius:999px;overflow:hidden;border:1px solid var(--accent);margin:8px 0}
 .bar{height:100%;width:0;background:var(--btn);transition:width .25s}
 
-/* Hábitos lista */
+/* Hábitos: acordeones */
 .list details{
   border:1px solid var(--accent);
   border-radius:12px;
@@ -102,19 +100,19 @@ body{
 .subrow .right{display:flex;gap:8px;align-items:center}
 .small{font-size:.92rem}
 
-/* Inputs especiales */
+/* Inputs */
 .input, .textarea {
   width:100%; padding:8px; border-radius:8px; border:1px solid var(--accent);
   background:rgba(255,255,255,.06); color:var(--text-light);
 }
 .textarea{min-height:64px; resize:vertical}
 
-/* Tablas + tips */
+/* Tables + tips */
 .table{width:100%;border-collapse:collapse;margin-top:8px;color:var(--text-light)}
 .table th,.table td{padding:8px;border-bottom:1px solid var(--accent)}
 .hint{border-left:3px solid var(--accent);padding-left:8px;margin-top:6px;color:#F2EDE6}
 
-/* Modales (sheets) */
+/* Sheets */
 .sheet{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:flex-end}
 .sheet[hidden]{display:none !important}
 .sheet-inner{
@@ -126,7 +124,7 @@ body{
 /* Intro layout */
 .intro-grid{display:grid;grid-template-columns:100px 1fr;gap:14px;margin-top:10px}
 
-/* Responsive móvil */
+/* Responsive */
 @media (max-width:600px){
   .wrap{padding:12px}
   .row{justify-content:center;text-align:center}
@@ -135,4 +133,3 @@ body{
   .intro-grid{grid-template-columns:1fr;justify-items:center}
   .topbar h1{font-size:1.2rem}
 }
-
