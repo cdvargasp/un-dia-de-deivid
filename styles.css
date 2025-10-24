@@ -52,6 +52,7 @@ body{
 .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .big{font-weight:700;font-size:1.35rem}
 .tiny{font-size:.95rem}
+.small{font-size:.92rem}
 .muted{color:var(--muted)}
 .bullets{margin:8px 0 0 18px}
 
@@ -85,20 +86,19 @@ body{
 .list summary{
   list-style:none;
   padding:12px;
-  display:grid;
-  grid-template-columns:1fr auto;
-  gap:8px;
+  display:grid; grid-template-columns:1fr auto; gap:8px;
   cursor:pointer;
 }
 .list summary::-webkit-details-marker{display:none}
 .list .sublist{padding:8px 12px 12px}
 .subrow{
-  display:grid; grid-template-columns:auto 1fr auto; gap:8px; align-items:center;
-  padding:8px 6px; border-bottom:1px dashed rgba(255,255,255,.12);
+  display:grid; grid-template-columns:auto 1fr auto;
+  gap:8px; align-items:center;
+  padding:8px 6px;
+  border-bottom:1px dashed rgba(255,255,255,.12);
 }
 .subrow:last-child{border-bottom:none}
 .subrow .right{display:flex;gap:8px;align-items:center}
-.small{font-size:.92rem}
 
 /* Inputs */
 .input, .textarea {
@@ -112,14 +112,26 @@ body{
 .table th,.table td{padding:8px;border-bottom:1px solid var(--accent)}
 .hint{border-left:3px solid var(--accent);padding-left:8px;margin-top:6px;color:#F2EDE6}
 
-/* Sheets */
-.sheet{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:flex-end}
+/* Sheets (modales) */
+.sheet{
+  position:fixed; inset:0; z-index:20;
+  background:rgba(0,0,0,.4); display:flex; align-items:flex-end;
+}
 .sheet[hidden]{display:none !important}
 .sheet-inner{
-  width:100%;max-width:980px;margin:auto;background:var(--card);color:var(--text-light);
-  border-top-left-radius:16px;border-top-right-radius:16px;border:1px solid var(--accent);padding:20px
+  width:100%; max-width:980px; margin:auto;
+  background:var(--card); color:var(--text-light);
+  border-top-left-radius:16px; border-top-right-radius:16px;
+  border:1px solid var(--accent);
+  padding:20px;
+  padding-bottom:calc(20px + env(safe-area-inset-bottom, 0px));
+  /* 🔧 hace scroll dentro del panel en móvil */
+  max-height:92vh; overflow:auto; -webkit-overflow-scrolling:touch;
 }
-@media (min-width:880px){.sheet{align-items:center}.sheet-inner{border-radius:16px;max-height:90vh;overflow:auto}}
+@media (min-width:880px){
+  .sheet{align-items:center}
+  .sheet-inner{border-radius:16px; max-height:90vh}
+}
 
 /* Intro layout */
 .intro-grid{display:grid;grid-template-columns:100px 1fr;gap:14px;margin-top:10px}
